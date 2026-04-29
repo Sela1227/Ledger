@@ -1,52 +1,30 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environment
 venv/
-ENV/
-env/
 .venv/
 
 # IDE
 .vscode/
 .idea/
 *.swp
-*.swo
 
-# Environment
-.env
-.env.local
-*.local
-
-# Logs
-*.log
-logs/
-
-# OS
+# 系統檔案
 .DS_Store
 Thumbs.db
 
-# Node (if applicable)
-node_modules/
+# 環境變數
+.env
+.env.local
 
-# Flet
-.flet/
+# 開發產物
+*.log
+*.bak
+test_*.json
+/tmp/
+
+# Excel 原始檔(內含真實金額,不上 repo)
+總資產*.xlsx
+*.xlsx
