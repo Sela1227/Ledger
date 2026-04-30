@@ -266,6 +266,26 @@ def extract_jinghan_from_sheet(ws):
     return out
 
 
+def extract_yunxiang_and_qyld(ws):
+    """
+    從 C21 抓雲象股價(2025/07 之後位置改變,A 欄不再有)
+    從 D19 抓 QYLD 年化報酬率(每月實際值,非固定)
+    """
+    out = {}
+    # C19 = 'QYLD 年化報酬率', D19 = 0.0739...
+    # C21 = '雲象', D21 = 165.51
+    for r in range(15, 25):
+        c_label = ws.cell(row=r, column=3).value  # C 欄
+        d_value = ws.cell(row=r, column=4).value  # D 欄
+        if not isinstance(c_label, str): continue
+        c_label = c_label.strip()
+        if c_label == 'QYLD 年化報酬率' and isinstance(d_value, (int, float)):
+            out['_qyld_yield'] = float(d_value)
+        elif c_label == '雲象' and isinstance(d_value, (int, float)):
+            out['yunxiang'] = float(d_value)
+    return out
+
+
 # ============================================================
 # 主流程
 # ============================================================
@@ -304,17 +324,25 @@ def main():
         # 景翰
         jh_balances = extract_jinghan_from_sheet(ws)
 
+        # 雲象 (C21) + 當月 QYLD 年化 (D19)
+        yx_qyld = extract_yunxiang_and_qyld(ws)
+        qyld = yx_qyld.pop('_qyld_yield', None)
+
         # 合併
-        all_balances = {**my_balances, **kids_balances, **jh_balances}
+        all_balances = {**my_balances, **kids_balances, **jh_balances, **yx_qyld}
 
         # 過濾掉 0 值(早期欄位很多沒填)
         all_balances = {k: round(v, 4) for k, v in all_balances.items() if v != 0 or k in ('cash_legacy',)}
 
-        snapshots.append({
+        snapshot = {
             'date': date,
             'balances': all_balances,
-        })
-        print(f"  ✓ {len(all_balances)} 個帳戶")
+        }
+        if qyld is not None:
+            snapshot['qyld_yield'] = round(qyld, 6)
+
+        snapshots.append(snapshot)
+        print(f"  ✓ {len(all_balances)} 個帳戶" + (f" + qyld={qyld:.4f}" if qyld else ""))
 
     # 排序(時間升冪)
     snapshots.sort(key=lambda s: s['date'])

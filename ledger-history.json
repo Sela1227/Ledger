@@ -182,7 +182,12 @@
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": true
+      "active": true,
+      "auto": {
+        "type": "formula",
+        "expression": "-yunxiang/15",
+        "description": "欠饅頭 = -雲象 / 15(投資協議,饅頭出資 1/15)"
+      }
     },
     {
       "id": "fubon_loan",
@@ -794,7 +799,8 @@
         "leo_cash": 8.1605,
         "aaron_stock": 195.9106,
         "aaron_cash": 8.1605
-      }
+      },
+      "qyld_yield": 0.063861
     },
     {
       "date": "2024-05-01",
@@ -820,7 +826,8 @@
         "leo_cash": 7.8883,
         "aaron_stock": 197.1914,
         "aaron_cash": 7.8883
-      }
+      },
+      "qyld_yield": 0.058472
     },
     {
       "date": "2024-06-01",
@@ -847,7 +854,8 @@
         "leo_cash": 7.609,
         "aaron_stock": 207.1109,
         "aaron_cash": 7.609
-      }
+      },
+      "qyld_yield": 0.064739
     },
     {
       "date": "2024-07-01",
@@ -878,7 +886,8 @@
         "jh_stock": 42.1573,
         "jh_loan": 131.565,
         "jh_cash": 8.6511
-      }
+      },
+      "qyld_yield": 0.062137
     },
     {
       "date": "2024-08-01",
@@ -908,7 +917,8 @@
         "aaron_cash": 6.4513,
         "jh_stock": 172.6689,
         "jh_cash": 7.4998
-      }
+      },
+      "qyld_yield": 0.060174
     },
     {
       "date": "2024-09-01",
@@ -938,7 +948,8 @@
         "aaron_cash": 10.2766,
         "jh_stock": 172.421,
         "jh_cash": 7.9546
-      }
+      },
+      "qyld_yield": 0.064854
     },
     {
       "date": "2024-10-01",
@@ -968,7 +979,8 @@
         "aaron_cash": 9.0162,
         "jh_stock": 175.0374,
         "jh_cash": 7.3612
-      }
+      },
+      "qyld_yield": 0.066816
     },
     {
       "date": "2024-11-01",
@@ -998,7 +1010,8 @@
         "aaron_cash": 7.1466,
         "jh_stock": 181.3924,
         "jh_cash": 6.4746
-      }
+      },
+      "qyld_yield": 0.060417
     },
     {
       "date": "2024-12-01",
@@ -1028,7 +1041,8 @@
         "aaron_cash": 5.2718,
         "jh_stock": 179.251,
         "jh_cash": 5.5988
-      }
+      },
+      "qyld_yield": 0.062565
     },
     {
       "date": "2025-01-01",
@@ -1058,7 +1072,8 @@
         "aaron_cash": 4.0353,
         "jh_stock": 186.2498,
         "jh_cash": 5.0098
-      }
+      },
+      "qyld_yield": 0.058844
     },
     {
       "date": "2025-02-01",
@@ -1088,7 +1103,8 @@
         "aaron_cash": 3.0879,
         "jh_stock": 190.7294,
         "jh_cash": 5.0129
-      }
+      },
+      "qyld_yield": 0.07209
     },
     {
       "date": "2025-03-01",
@@ -1118,7 +1134,8 @@
         "aaron_cash": 5.8853,
         "jh_stock": 186.7751,
         "jh_cash": 8.681
-      }
+      },
+      "qyld_yield": 0.084952
     },
     {
       "date": "2025-04-01",
@@ -1148,7 +1165,8 @@
         "aaron_cash": 4.6005,
         "jh_stock": 174.1957,
         "jh_cash": 8.0452
-      }
+      },
+      "qyld_yield": 0.082191
     },
     {
       "date": "2025-05-01",
@@ -1179,7 +1197,8 @@
         "aaron_cash": 6.8183,
         "jh_stock": 174.1957,
         "jh_cash": 8.0452
-      }
+      },
+      "qyld_yield": 0.074971
     },
     {
       "date": "2025-06-01",
@@ -1210,7 +1229,8 @@
         "aaron_cash": 5.4503,
         "jh_stock": 175.1656,
         "jh_cash": 6.3015
-      }
+      },
+      "qyld_yield": 0.086321
     },
     {
       "date": "2025-07-01",
@@ -1239,8 +1259,10 @@
         "aaron_stock": 264.9033,
         "aaron_cash": 4.6587,
         "jh_stock": 187.4071,
-        "jh_cash": 5.6778
-      }
+        "jh_cash": 5.6778,
+        "yunxiang": 156.6538
+      },
+      "qyld_yield": 0.079769
     },
     {
       "date": "2025-08-01",
@@ -1269,8 +1291,10 @@
         "aaron_stock": 283.982,
         "aaron_cash": 3.3257,
         "jh_stock": 198.3465,
-        "jh_cash": 104.8239
-      }
+        "jh_cash": 104.8239,
+        "yunxiang": 153.5675
+      },
+      "qyld_yield": 0.076391
     },
     {
       "date": "2025-09-01",
@@ -1299,8 +1323,10 @@
         "aaron_stock": 290.8395,
         "aaron_cash": 3.6798,
         "jh_stock": 231.2439,
-        "jh_cash": 77.3588
-      }
+        "jh_cash": 77.3588,
+        "yunxiang": 165.5144
+      },
+      "qyld_yield": 0.073971
     },
     {
       "date": "2025-10-01",
@@ -1329,8 +1355,10 @@
         "aaron_stock": 320.1159,
         "aaron_cash": 2.3412,
         "jh_stock": 244.6883,
-        "jh_cash": 98.5552
-      }
+        "jh_cash": 98.5552,
+        "yunxiang": 175.719
+      },
+      "qyld_yield": 0.07953
     },
     {
       "date": "2025-11-01",
@@ -1359,8 +1387,10 @@
         "aaron_stock": 346.6565,
         "aaron_cash": 7.7361,
         "jh_stock": 310.1359,
-        "jh_cash": 45.146
-      }
+        "jh_cash": 45.146,
+        "yunxiang": 161.0344
+      },
+      "qyld_yield": 0.088709
     },
     {
       "date": "2025-12-01",
@@ -1389,8 +1419,10 @@
         "aaron_stock": 332.4167,
         "aaron_cash": 6.3618,
         "jh_stock": 302.79,
-        "jh_cash": 38.598
-      }
+        "jh_cash": 38.598,
+        "yunxiang": 187.6659
+      },
+      "qyld_yield": 0.068625
     },
     {
       "date": "2026-01-01",
@@ -1420,8 +1452,10 @@
         "aaron_stock": 358.9458,
         "aaron_cash": 5.2511,
         "jh_stock": 327.0096,
-        "jh_cash": 32.8759
-      }
+        "jh_cash": 32.8759,
+        "yunxiang": 180.4481
+      },
+      "qyld_yield": 0.060059
     },
     {
       "date": "2026-02-01",
@@ -1451,8 +1485,10 @@
         "aaron_stock": 383.8352,
         "aaron_cash": 3.9068,
         "jh_stock": 346.6092,
-        "jh_cash": 26.5175
-      }
+        "jh_cash": 26.5175,
+        "yunxiang": 174.4746
+      },
+      "qyld_yield": 0.060059
     },
     {
       "date": "2026-03-01",
@@ -1482,8 +1518,10 @@
         "aaron_stock": 424.6723,
         "aaron_cash": 12.1002,
         "jh_stock": 402.7335,
-        "jh_cash": 11.0062
-      }
+        "jh_cash": 11.0062,
+        "yunxiang": 172.0354
+      },
+      "qyld_yield": 0.060059
     }
   ]
 }
