@@ -5,18 +5,27 @@
 
 ---
 
-## ⚠️ V0.6.1 升版必讀
+## ⚠️ V0.7.0 升版必讀
 
-V0.6.1 是**首頁 UX 重構**:Sela 抱怨 V0.6 首頁從上滑到下太長,改成「分類加總顯示為主、點開才看細項」的摺疊式 UI。看坑 #20。
+V0.7.0 是**凍結機制**:Sela 不想之後改公式或設定影響到舊月份的歷史紀錄。看坑 #24~#26。
 
-主要視覺變化:
-- 帳戶列表(原本 17+ 行)→ **摺疊群組(8 個分類)**,每個只顯示加總和月變化,點開才看明細
-- 「資產組合」改為自定義分組(美股/台股加密/台幣銀行/退休金/不動產/其他/負債/參考)
-- 雲象獨立放「參考」群組(藍色 dot,提示不計總)
-- 退休後月領兩種改成 key-tile 一行式
-- 自動停用 4 個歷史殘留帳戶(cash_legacy, fubon_loan, xt_loan, jh_loan)
+核心規則:
 
-V0.6.0 的 Excel 公式對齊全部繼承,12 條公式仍 100% 對齊。
+| 場景 | 行為 |
+|---|---|
+| 最新一張快照(後面沒更新的) | **活的** — 跟著 settings/公式變動 |
+| 非最新快照(已被下一張接續) | **凍結** — 讀 `snapshot.computed`,不再變 |
+| 儲存「下一張」資產表時 | 自動凍結「上一張」 |
+| 編輯非最新月份 | 只改 balances,computed 不變 |
+| 編輯最新月份 | 用當前公式重算(因為它還是活的) |
+| 新建中間月份(後面已有更新的) | 一儲存就立刻凍結(不可能變最新了) |
+| 啟動 V0.7 | 自動把所有「非最新且沒 computed」的快照凍結 |
+
+逃生口:設定頁加「強制重新凍結所有歷史」按鈕(用當前公式重算覆蓋)。
+
+V0.6.x 的 Excel 12 條公式對齊全部繼承(對最新月份),凍結後的歷史則固定為「凍結當下的公式結果」。
+
+⚠️ **V0.7 第一次啟動,所有歷史會用當前公式凍結一次**。意思是即使 2025/09 那時候沒有台新車貸,凍結後的「月支出」也會包含車貸 2.1429(因為今天 settings 有車貸)。這是「以今天的眼光回算歷史」,使用者可接受就用,不接受就之後手動改該月再「強制重凍」。
 
 **部署選項(Sela 已選 A)**:
 
@@ -211,6 +220,48 @@ V0.6.0 的 Excel 公式對齊全部繼承,12 條公式仍 100% 對齊。
     - 做法:檢查最近 6 個月的 snapshots,如果某帳戶都沒值,自動 `active=false`
     - 已自動停用的:cash_legacy, fubon_loan, xt_loan, jh_loan
 
+22. **手機數字輸入框三重 bug:擠、失焦、不觸發** (V0.6.2 教訓)
+    - 症狀:Sela 在 iPhone 開設定頁改貸款月繳,輸入框被擠到 50px 寬看不清楚;打字打到一半輸入框會跳出來;有時改完數字沒反應
+    - 原因(三個各自獨立):
+      - **CSS**:`setting-row` flex 排版 + label 文字太長,輸入框被壓
+      - **renderAll**:`oninput` 每次重繪整個設定頁,DOM 重建讓 input 失焦
+      - **onchange**:手機數字鍵盤要按「完成」才觸發 onchange,使用者以為沒反應
+    - 做法:
+      - 貸款月繳改用 `loan-pmt-card`(獨立卡片,輸入框佔整行)
+      - 用 `oninput` 即時觸發(每按一鍵就存)
+      - 加 `inputmode="decimal"` 開數字鍵盤
+      - 加 `onfocus="this.select()"` 自動全選方便覆寫
+      - `updateSetting/updateLoanPmt` 移除 `renderAll()`,改靠 `switchPage` 切回 dashboard 時自動重繪
+      - 例外:`updateLoanPmt` 還是更新一下「合計」顯示(用 `id="loan-pmt-sum"` 局部更新,不影響輸入框)
+
+23. **設定的 loan_pmt 跟 snapshot.tesla_pmt_wan 要避免 double-count** (V0.6.2 教訓)
+    - 症狀:V0.6.2 加台新車貸進 settings 後,2026/03 的「貸款月繳」可能變 31.66 萬(多算一次 Tesla)
+    - 原因:V0.6 的 `computeTotalLoanPmt` 是「settings 全加 + snapshot.tesla 也加」
+    - 做法:遍歷 settings.loan_pmt_wan,若該筆名稱是「台新車貸」且 snapshot 有 tesla_pmt_wan,**用 snapshot 值取代**(該月實際金額優先)
+    - 結果:2026/03 = 29.52 ✓ / 2026/01 = 29.48 (snapshot=2.1 取代 settings=2.1429) ✓
+
+24. **「凍結機制」要分清楚最新跟非最新** (V0.7.0 教訓)
+    - 症狀:Sela 想要「按確定後就變成純數字記錄,不再被公式變動影響」
+    - 原因:V0.6 所有衍生數字都用當前 settings/公式即時算,改 settings 會回頭影響所有歷史
+    - 做法:加 `snapshot.computed` 區塊存凍結值,加 `getStats()` 包裝函式:最新月份即時算 / 非最新讀 computed / 沒 computed 就 fallback computeStats
+    - 凍結時點:儲存「下一張」資產表時,凍結「上一張」(因為它再也不會變最新)
+    - **不要改 `computeStats` 本身** — 它仍然是純算函式,給「活的最新月份」和「逃生口重凍」用
+
+25. **autoFreezeOldSnapshots 用「當下 settings」凍結歷史 — 是副作用不是 bug** (V0.7.0 教訓)
+    - 症狀:V0.7 第一次啟動,2025/09 月支出凍結成 57.52 萬(包含當下 settings 的台新車貸 2.1429),但 2025/09 那時根本沒有車貸,Excel 顯示 55.38 萬
+    - 原因:啟動時用當前公式 + 當前 settings 算,所以「歷史月份用了還沒發生的車貸」
+    - 做法:**接受這個副作用**,理由是修正成本太高(要從 Excel 逐月推算當時的 settings 列表),而且 Sela 的需求是「以後不變」而不是「已發生的不影響」
+    - 邊界:Sela 若要修,可以編輯該月→改 frozen_settings 的快取→重凍,或用 forceRefreezeAll 在改設定後重凍(但會再次用當下 settings)
+
+26. **編輯非最新月份不能跑公式重算** (V0.7.0 規則)
+    - 症狀:V0.6.x 的 saveSnapshot 不管編輯誰都用 computeStats,結果改個小數字會把整個 computed 重算成「當前公式 ✕ 該月 balances」
+    - 原因:V0.6 沒有「凍結」的概念
+    - 做法:saveSnapshot 編輯模式分三類:
+      - 編輯**最新**月份 → 不寫 computed(讓它保持活的)
+      - 編輯**非最新已凍結** → 保留原 computed(只改 balances)
+      - 編輯**非最新但還沒凍結**(舊資料) → 用當前公式凍結一次
+    - 邊界:這代表編輯舊月份的 balances 不會反映在「離退休還差」之類的衍生欄位,Sela 知道這是 by design
+
 ---
 
 ## 五、關鍵路徑(改 X 功能動哪幾個地方)
@@ -273,13 +324,13 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 ## 七、版本歷程(只留近期)
 
+- **V0.7.0** — 凍結機制:加 `snapshot.computed` 存凍結值,`getStats()` 包裝(最新→即時/非最新→讀凍結),`saveSnapshot` 儲存下一張時凍結上一張,啟動時自動凍結舊資料,設定頁加「強制重新凍結」逃生口
+- **V0.6.2** — 手機 UX 修正:貸款月繳改卡片式 UI、所有設定輸入改 `oninput` + `inputmode="decimal"`、`updateSetting` 不再 renderAll(避免輸入框失焦);settings 加台新車貸,snapshot.tesla_pmt_wan 覆蓋 settings 值
 - **V0.6.1** — 首頁 UX 重構:帳戶列表改摺疊群組(預設加總、點開看細項)、自定義分組對齊 Sela 會計概念(台幣銀行/外幣/雲象參考各自獨立)、退休後月領改 key-tile 一行式、自動停用 4 個歷史殘留帳戶
 - **V0.6.0** — 退休試算重構:對齊 Excel 12 條公式(F2 月支出、F5 貸款月繳、D6 還差、D7 退休年、I11~I18 退休試算、I9 美股、G13 菜石差額);加 reference side(雲象)、normal_liab(排除 formula 類);加 settings.salary/card/loan_pmt_wan/birthday/retire_extension;快照加 monthly_kid_wan/tesla_pmt_wan
 - **V0.5.1** — 公式語意修正:編輯舊月份不主動套用公式,改顯示「期望 vs 實際」對帳資訊(✓/⚠);新增模式維持 readonly 自動算
 - **V0.5.0** — 退休目標改自動算(月支出×12÷yld)、每快照存當月 yld、mantou 改 formula 自動算、加 show_inactive_accounts toggle、按鈕「快照」改「資產表」、匯入腳本支援 C21 雲象 + D19 yld
 - **V0.4.0** — 加密碼登入(SHA-256)、內嵌歷史改顯式載入、匯入改合併、清空保留帳戶結構、設定頁加登出按鈕、Help modal 重寫
-- **V0.3.0** — Excel→JSON 匯入腳本完成,57 筆歷史正確匯入,內嵌進 HTML,加 PWA manifest
-- **V0.2.0** — 字體換 Noto Sans TC + JetBrains Mono、加歷史頁(區間/指標切換)、加 SVG 走勢圖、加代管頁三人疊加圖、加 Help modal、加快照編輯
 
 ---
 
@@ -314,4 +365,4 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 ## 九、一句話總結
 
-V0.6.1 首頁 UX 重構版:Sela 反應 V0.6 首頁太長,改成「分類加總顯示為主、點開看細項」的摺疊式;分組按 Sela 的會計概念定義(台幣銀行排除南非幣和歷史殘留、雲象獨立放「參考」群組、退休後月領改一行 key-tile);V0.6.0 的 Excel 12 條公式對齊 100% 不變。下版第一優先是把 PWA 在 iPhone 實機跑一次驗證加主畫面流程。
+V0.7.0 凍結機制版:Sela 不想之後改公式或設定影響歷史紀錄,設計成「最新月份是活的、儲存下一張時凍結上一張」,凍結值存進 `snapshot.computed` 區塊;`getStats()` 包裝函式判斷「最新→即時 / 非最新→讀凍結」;啟動時自動凍結所有舊資料(用當前公式算一次),設定頁加「強制重新凍結」逃生口。Excel 12 條公式仍對齊最新月份。下版第一優先還是 PWA 在 iPhone 實機驗證加主畫面流程。

@@ -11,6 +11,11 @@
     "extra_return_wan": 0,
     "loan_pmt_wan": [
       {
+        "name": "台新車貸",
+        "wan_per_month": 2.1429,
+        "due_day": 11
+      },
+      {
         "name": "玉山房貸",
         "wan_per_month": 3.4227,
         "due_day": 28

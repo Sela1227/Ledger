@@ -223,6 +223,38 @@
     margin-left: 2px;
   }
 
+  /* ============ Loan PMT card (mobile-friendly) ============ */
+  .loan-pmt-card {
+    background: var(--bg-elev); border: 1px solid var(--line-soft);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 6px;
+  }
+  .loan-pmt-card .top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .loan-pmt-card .nm {
+    font-family: var(--tc); font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+  .loan-pmt-card .due {
+    font-family: var(--num); font-size: 11px; color: var(--ink-dim);
+  }
+  .loan-pmt-card .bottom {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .loan-pmt-card input {
+    flex: 1; min-width: 0;
+    background: var(--bg); border: 1px solid var(--line); color: var(--gold);
+    padding: 10px 12px; border-radius: 8px;
+    font-family: var(--num); font-size: 16px; font-weight: 600;
+    text-align: right;
+    -webkit-appearance: none;
+  }
+  .loan-pmt-card input:focus { outline: none; border-color: var(--gold); }
+  .loan-pmt-card .unit {
+    font-family: var(--tc); font-size: 13px; color: var(--ink-mute);
+    flex-shrink: 0;
+  }
+
   /* ============ Top bar ============ */
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
@@ -831,6 +863,11 @@ const DEFAULT_DATA = {
     "extra_return_wan": 0,
     "loan_pmt_wan": [
       {
+        "name": "台新車貸",
+        "wan_per_month": 2.1429,
+        "due_day": 11
+      },
+      {
         "name": "玉山房貸",
         "wan_per_month": 3.4227,
         "due_day": 28
@@ -1303,17 +1340,117 @@ function computeYearsToRetireDate(snapshotDate) {
   return (target - today) / (365 * 24 * 60 * 60 * 1000);
 }
 
-// 算貸款月繳合計(萬/月),含設定裡的固定貸款 + 該月特斯拉車貸
+// 算貸款月繳合計(萬/月)。
+// 規則:遍歷 settings.loan_pmt_wan,若該月 snapshot 有 tesla_pmt_wan,
+// 則「台新車貸」那筆用 snapshot 值取代(否則用 settings 預設)
 function computeTotalLoanPmt(snapshot) {
   let total = 0;
-  // 固定貸款月繳(從 settings)
   for (const loan of (DATA.settings.loan_pmt_wan || [])) {
-    total += loan.wan_per_month || 0;
+    if (loan.name === '台新車貸' && snapshot.tesla_pmt_wan != null) {
+      // 該月有實際車貸金額,用實際的
+      total += snapshot.tesla_pmt_wan;
+    } else {
+      total += loan.wan_per_month || 0;
+    }
   }
-  // 特斯拉車貸(逐月變動,存在 snapshot)
-  if (snapshot.tesla_pmt_wan != null) total += snapshot.tesla_pmt_wan;
   return total;
 }
+
+// ============================================================
+// 凍結機制 (V0.7)
+// ============================================================
+// 規則:
+// - 「最新一張」snapshot 是「活的」,總是即時算 → 跟著公式/settings 變
+// - 「非最新」snapshot 是「凍結的」,讀 snapshot.computed → 不被未來公式影響
+// - 儲存「下一張」時,自動凍結「上一張」
+// - 編輯非最新月份只改 balances,computed 不變
+
+// 判斷某 snapshot 是否為最新(後面沒更新的)
+function isLatestSnapshot(snapshot) {
+  for (const s of DATA.snapshots) {
+    if (s.date > snapshot.date) return false;
+  }
+  return true;
+}
+
+// 把 computeStats 結果 + 當下 settings 凍結進 snapshot.computed
+function freezeSnapshot(snapshot) {
+  const stats = computeStats(snapshot);
+  // 寫入 stats 全部數值
+  snapshot.computed = {
+    // 衍生數值
+    total: stats.total,
+    assets: stats.assets,
+    liab: stats.liab,
+    normal_liab: stats.normal_liab,
+    liquid: stats.liquid,
+    movable: stats.movable,
+    real_estate: stats.real_estate,
+    debtRatio: stats.debtRatio,
+    yld: stats.yld,
+    us_stock: stats.us_stock,
+    us_stock_at_retire: stats.us_stock_at_retire,
+    labor_at_retire: stats.labor_at_retire,
+    yearsToRetireDate: stats.yearsToRetireDate,
+    retireExt: stats.retireExt,
+    totalYearsToRetire: stats.totalYearsToRetire,
+    monthly_expense: stats.monthly_expense,
+    salary: stats.salary,
+    monthly_cashflow: stats.monthly_cashflow,
+    loan_pmt_total: stats.loan_pmt_total,
+    stillNeed: stats.stillNeed,
+    yearsToRetire: stats.yearsToRetire,
+    monthly_at_retire_with_debt: stats.monthly_at_retire_with_debt,
+    monthly_at_retire_no_debt: stats.monthly_at_retire_no_debt,
+    // 凍結當時的完整 settings
+    frozen_settings: {
+      qyld_yield: DATA.settings.qyld_yield,
+      salary_wan: DATA.settings.salary_wan,
+      monthly_card_wan: DATA.settings.monthly_card_wan,
+      retire_birthday: DATA.settings.retire_birthday,
+      retire_extension_years: DATA.settings.retire_extension_years,
+      extra_return_wan: DATA.settings.extra_return_wan,
+      loan_pmt_wan: JSON.parse(JSON.stringify(DATA.settings.loan_pmt_wan || [])),
+    },
+    frozen_at: new Date().toISOString(),
+  };
+}
+
+// 取得快照的統計值。
+// 最新 → 即時算;非最新 + 有 computed → 直接讀;非最新 + 沒 computed → 用當前公式算(歷史 fallback)
+function getStats(snapshot) {
+  if (!snapshot) return null;
+  if (isLatestSnapshot(snapshot)) {
+    return computeStats(snapshot);
+  }
+  if (snapshot.computed) {
+    // 凍結資料:直接讀 computed
+    return snapshot.computed;
+  }
+  // 沒凍結的舊資料(V0.7 之前):fallback 用當前公式算
+  return computeStats(snapshot);
+}
+
+// 啟動時補凍結:把所有「非最新」且「沒 computed」的快照凍結
+// 這樣 V0.7 第一次啟動時,57 筆歷史會自動凍結成「當前公式的計算結果」
+function autoFreezeOldSnapshots() {
+  let count = 0;
+  const sorted = [...DATA.snapshots].sort((a,b) => a.date.localeCompare(b.date));
+  // 跳過最新那筆
+  const toFreeze = sorted.slice(0, -1);
+  for (const s of toFreeze) {
+    if (!s.computed) {
+      freezeSnapshot(s);
+      count++;
+    }
+  }
+  if (count > 0) {
+    console.log(`[autoFreeze] 凍結了 ${count} 筆舊快照`);
+    saveData();
+  }
+  return count;
+}
+
 
 function getAccountDelta(accId, currentDate) {
   const cur = DATA.snapshots.find(s => s.date === currentDate);
@@ -1519,9 +1656,9 @@ function renderDashboard() {
     return;
   }
 
-  const stats = computeStats(latest);
+  const stats = getStats(latest);
   const prev = getPrevSnapshot(latest.date);
-  const prevStats = prev ? computeStats(prev) : null;
+  const prevStats = prev ? getStats(prev) : null;
   const delta = prevStats ? stats.total - prevStats.total : 0;
   const deltaPct = prevStats && prevStats.total !== 0 ? delta / prevStats.total : 0;
   const deltaCls = delta > 0 ? '' : (delta < 0 ? 'neg' : 'zero');
@@ -1530,12 +1667,12 @@ function renderDashboard() {
   // Mini trend chart (last 12 months)
   const sorted = getSortedSnapshots();
   const last12 = sorted.slice(-12);
-  const trendPoints = last12.map(s => ({ date: s.date, value: computeStats(s).total }));
+  const trendPoints = last12.map(s => ({ date: s.date, value: getStats(s).total }));
 
   // 歷史最高點
   let allTimeHigh = stats.total, allTimeHighDate = latest.date;
   for (const s of sorted) {
-    const t = computeStats(s).total;
+    const t = getStats(s).total;
     if (t > allTimeHigh) { allTimeHigh = t; allTimeHighDate = s.date; }
   }
   const fromHigh = stats.total - allTimeHigh;
@@ -1733,10 +1870,10 @@ function renderHistory() {
 
   // Build metric points
   const metricDefs = {
-    total:     { label: '總資產', color: 'var(--gold)', fn: s => computeStats(s).total },
-    movable:   { label: '動產',   color: 'var(--blue)', fn: s => computeStats(s).movable },
-    liab:      { label: '負債',   color: 'var(--red)',  fn: s => Math.abs(computeStats(s).liab) },
-    debtRatio: { label: '負債比', color: 'var(--purple)', fn: s => computeStats(s).debtRatio * 100 },
+    total:     { label: '總資產', color: 'var(--gold)', fn: s => getStats(s).total },
+    movable:   { label: '動產',   color: 'var(--blue)', fn: s => getStats(s).movable },
+    liab:      { label: '負債',   color: 'var(--red)',  fn: s => Math.abs(getStats(s).liab) },
+    debtRatio: { label: '負債比', color: 'var(--purple)', fn: s => getStats(s).debtRatio * 100 },
   };
 
   const m = metricDefs[HISTORY_METRIC];
@@ -1765,8 +1902,8 @@ function renderHistory() {
   for (let i = 0; i < reverseSorted.length; i++) {
     const s = reverseSorted[i];
     const next = reverseSorted[i + 1]; // older
-    const stat = computeStats(s);
-    const prevStat = next ? computeStats(next) : null;
+    const stat = getStats(s);
+    const prevStat = next ? getStats(next) : null;
     const d = prevStat ? stat.total - prevStat.total : null;
     const dCls = d == null ? '' : (d > 0 ? 'up' : (d < 0 ? 'down' : ''));
     const dSign = d == null ? '' : (d > 0 ? '+' : '');
@@ -1822,7 +1959,7 @@ function renderHistory() {
 }
 
 function renderSnapshotDetail(snapshot) {
-  const stat = computeStats(snapshot);
+  const stat = getStats(snapshot);
   const myAccs = getActiveAccounts({ owner: 'me' });
   const cells = myAccs.map(a => {
     const v = snapshot.balances[a.id];
@@ -2351,9 +2488,52 @@ function saveSnapshot() {
   if (SNAP_DRAFT.tesla_pmt_wan != null && !isNaN(SNAP_DRAFT.tesla_pmt_wan)) {
     snap.tesla_pmt_wan = SNAP_DRAFT.tesla_pmt_wan;
   }
+
   const wasEdit = SNAP_DRAFT.isEdit;
-  if (idx >= 0) DATA.snapshots[idx] = snap;
-  else DATA.snapshots.push(snap);
+
+  // === V0.7 凍結邏輯 ===
+  if (wasEdit) {
+    // 編輯模式
+    const existing = DATA.snapshots[idx];
+    if (existing && isLatestSnapshot(existing)) {
+      // 編輯「最新」月份:該月還是活的,不凍結。computed 留空
+      // 替換但保留可能的 computed?其實對最新月份 computed 沒用,直接清掉
+      delete snap.computed;
+    } else if (existing && existing.computed) {
+      // 編輯「非最新」月份:保留原 computed(只改 balances)
+      snap.computed = existing.computed;
+    } else {
+      // 編輯「非最新」但還沒凍結的舊資料:用當前公式凍結
+      // 先寫 snapshot 進 DATA 才能算
+      DATA.snapshots[idx] = snap;
+      freezeSnapshot(snap);  // 直接修改 snap 物件
+    }
+    if (idx >= 0) DATA.snapshots[idx] = snap;
+  } else {
+    // 新增模式
+    // 找出儲存「之前」的最新一張(因為儲存後可能換它變成最新)
+    const sortedBefore = [...DATA.snapshots].sort((a,b) => a.date.localeCompare(b.date));
+    const prevLatest = sortedBefore.length ? sortedBefore[sortedBefore.length - 1] : null;
+
+    if (idx >= 0) DATA.snapshots[idx] = snap;
+    else DATA.snapshots.push(snap);
+
+    // 重新排序看現在誰是最新
+    const sortedAfter = [...DATA.snapshots].sort((a,b) => a.date.localeCompare(b.date));
+    const newLatest = sortedAfter[sortedAfter.length - 1];
+
+    if (newLatest.date === snap.date) {
+      // 新快照是最新 → 凍結舊的最新(prevLatest)
+      if (prevLatest && !prevLatest.computed) {
+        freezeSnapshot(prevLatest);
+      }
+      // 新快照本身是最新 = 活的,不凍結
+    } else {
+      // 新快照在中間(後面已有更新的)→ 直接凍結它
+      freezeSnapshot(snap);
+    }
+  }
+
   saveData();
   SNAP_DRAFT = null;
   toast(wasEdit ? '資產表已更新 ✓' : '資產表已儲存 ✓');
@@ -2396,11 +2576,13 @@ function renderSettings() {
     <div class="setting-section">
       <div class="setting-row">
         <div class="label">月薪水<span class="sub">SALARY (萬) · F1</span></div>
-        <input type="number" step="any" value="${s.salary_wan || 0}" onchange="updateSetting('salary_wan', this.value)">
+        <input type="number" inputmode="decimal" step="any" value="${s.salary_wan || 0}"
+               oninput="updateSetting('salary_wan', this.value)" onfocus="this.select()">
       </div>
       <div class="setting-row">
         <div class="label">每月卡費+提領<span class="sub">CARD (萬) · F3</span></div>
-        <input type="number" step="any" value="${s.monthly_card_wan || 0}" onchange="updateSetting('monthly_card_wan', this.value)">
+        <input type="number" inputmode="decimal" step="any" value="${s.monthly_card_wan || 0}"
+               oninput="updateSetting('monthly_card_wan', this.value)" onfocus="this.select()">
       </div>
     </div>
 
@@ -2409,18 +2591,22 @@ function renderSettings() {
       固定每月繳款金額(萬/月)。用於計算月支出 + 退休試算的累積還款。<br>
       <span style="color:var(--ink-dim);">特斯拉車貸金額逐月變動,在每月「資產表」輸入。</span>
     </p>
-    <div class="setting-section">
-      ${(s.loan_pmt_wan || []).map((loan, idx) => `
-        <div class="setting-row">
-          <div class="label">${loan.name}
-            <span class="sub">每月 ${loan.due_day} 號 · ${fmtWan(loan.wan_per_month, {dp:4})} 萬</span>
-          </div>
-          <input type="number" step="0.0001" value="${loan.wan_per_month}"
-                 onchange="updateLoanPmt(${idx}, this.value)" style="width:100px;">
+    ${(s.loan_pmt_wan || []).map((loan, idx) => `
+      <div class="loan-pmt-card">
+        <div class="top">
+          <span class="nm">${loan.name}</span>
+          <span class="due">每月 ${loan.due_day} 號</span>
         </div>
-      `).join('')}
-    </div>
-    <p style="color:var(--gold-soft);font-size:12px;margin-top:6px;text-align:right;font-family:var(--num);">
+        <div class="bottom">
+          <input type="number" inputmode="decimal" step="0.0001"
+                 value="${loan.wan_per_month}"
+                 oninput="updateLoanPmt(${idx}, this.value)"
+                 onfocus="this.select()" />
+          <span class="unit">萬/月</span>
+        </div>
+      </div>
+    `).join('')}
+    <p id="loan-pmt-sum" style="color:var(--gold-soft);font-size:12px;margin-top:10px;text-align:right;font-family:var(--num);">
       合計:${fmtWan((s.loan_pmt_wan || []).reduce((sum, l) => sum + (l.wan_per_month || 0), 0), {dp:4})} 萬/月
     </p>
 
@@ -2428,19 +2614,23 @@ function renderSettings() {
     <div class="setting-section">
       <div class="setting-row">
         <div class="label">退休生日<span class="sub">BIRTHDAY · 50 歲那天</span></div>
-        <input type="date" value="${s.retire_birthday || '2029-12-27'}" onchange="updateSettingStr('retire_birthday', this.value)" style="width:140px;">
+        <input type="date" value="${s.retire_birthday || '2029-12-27'}"
+               onchange="updateSettingStr('retire_birthday', this.value)" style="width:140px;">
       </div>
       <div class="setting-row">
         <div class="label">延長/提前年限<span class="sub">EXTENSION · I12 (+ 延後 / − 提早)</span></div>
-        <input type="number" step="0.5" value="${s.retire_extension_years || 0}" onchange="updateSetting('retire_extension_years', this.value)">
+        <input type="number" inputmode="decimal" step="0.5" value="${s.retire_extension_years || 0}"
+               oninput="updateSetting('retire_extension_years', this.value)" onfocus="this.select()">
       </div>
       <div class="setting-row">
         <div class="label">額外報酬<span class="sub">EXTRA_RETURN (萬) · I13</span></div>
-        <input type="number" step="any" value="${s.extra_return_wan || 0}" onchange="updateSetting('extra_return_wan', this.value)">
+        <input type="number" inputmode="decimal" step="any" value="${s.extra_return_wan || 0}"
+               oninput="updateSetting('extra_return_wan', this.value)" onfocus="this.select()">
       </div>
       <div class="setting-row">
         <div class="label">QYLD 預設年化<span class="sub">YIELD_DEFAULT · 快照無記錄時 fallback</span></div>
-        <input type="number" step="0.0001" value="${s.qyld_yield}" onchange="updateSetting('qyld_yield', this.value)">
+        <input type="number" inputmode="decimal" step="0.0001" value="${s.qyld_yield}"
+               oninput="updateSetting('qyld_yield', this.value)" onfocus="this.select()">
       </div>
     </div>
 
@@ -2470,12 +2660,16 @@ function renderSettings() {
         <button class="btn" onclick="loadEmbeddedHistory()">載入合併</button>
       </div>
       <div class="setting-row">
-        <div class="label">目前快照數<span class="sub">${DATA.snapshots.length} 筆</span></div>
+        <div class="label">目前快照數<span class="sub">${DATA.snapshots.length} 筆 · 已凍結 ${DATA.snapshots.filter(s => s.computed).length}</span></div>
         <button class="btn" onclick="exportData()">匯出 JSON</button>
       </div>
       <div class="setting-row">
         <div class="label">匯入 JSON 檔<span class="sub">合併或覆蓋現有資料</span></div>
         <button class="btn" onclick="importData()">選擇檔案</button>
+      </div>
+      <div class="setting-row">
+        <div class="label">強制重新凍結所有歷史<span class="sub">用當前公式重算所有非最新月份的 computed</span></div>
+        <button class="btn" onclick="forceRefreezeAll()">重新凍結</button>
       </div>
       <div class="setting-row">
         <div class="label">清空所有資料<span class="sub">回到空白狀態</span></div>
@@ -2500,24 +2694,28 @@ function renderSettings() {
 function updateSetting(key, val) {
   DATA.settings[key] = parseFloat(val);
   saveData();
-  renderAll();
+  // 不立刻 renderAll(),改用「離開設定頁」時統一更新
   toast('已更新');
 }
 
 function updateSettingStr(key, val) {
   DATA.settings[key] = val;
   saveData();
-  renderAll();
   toast('已更新');
 }
 
 function updateLoanPmt(idx, val) {
   if (!DATA.settings.loan_pmt_wan) DATA.settings.loan_pmt_wan = [];
   if (DATA.settings.loan_pmt_wan[idx]) {
-    DATA.settings.loan_pmt_wan[idx].wan_per_month = parseFloat(val);
+    DATA.settings.loan_pmt_wan[idx].wan_per_month = parseFloat(val) || 0;
     saveData();
-    renderAll();
-    toast('貸款月繳已更新');
+    // 不要 renderAll(),否則使用者每打一個字輸入框就會失焦
+    // 只更新底部的「合計」顯示
+    const sumEl = document.getElementById('loan-pmt-sum');
+    if (sumEl) {
+      const sum = DATA.settings.loan_pmt_wan.reduce((s, l) => s + (l.wan_per_month || 0), 0);
+      sumEl.textContent = `合計:${fmtWan(sum, {dp:4})} 萬/月`;
+    }
   }
 }
 
@@ -2689,6 +2887,25 @@ function importData() {
 }
 
 // ============================================================
+// 強制重新凍結所有非最新月份(逃生口)
+// ============================================================
+function forceRefreezeAll() {
+  const sorted = [...DATA.snapshots].sort((a,b) => a.date.localeCompare(b.date));
+  const toRefreeze = sorted.slice(0, -1);  // 跳過最新
+  if (!toRefreeze.length) {
+    toast('沒有需要凍結的歷史');
+    return;
+  }
+  if (!confirm(`將用當前公式重算 ${toRefreeze.length} 筆歷史月份的 computed,覆蓋原本凍結值。確定?`)) return;
+  for (const s of toRefreeze) {
+    freezeSnapshot(s);
+  }
+  saveData();
+  renderAll();
+  toast(`已重新凍結 ${toRefreeze.length} 筆`);
+}
+
+// ============================================================
 // 清空資料(回到空白)
 // ============================================================
 function resetData() {
@@ -2777,6 +2994,9 @@ function toast(msg) {
 
 // INIT
 function initApp() {
+  // V0.7 啟動時自動凍結舊快照(只凍結沒 computed 的非最新月份)
+  autoFreezeOldSnapshots();
+
   document.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => switchPage(t.dataset.page));
   });
