@@ -3,7 +3,39 @@
   "settings": {
     "retirement_target_wan": 8955,
     "qyld_yield": 0.0739,
-    "monthly_expense_wan": 21.81
+    "monthly_expense_wan": 21.81,
+    "salary_wan": 33.5676,
+    "monthly_card_wan": 25.0,
+    "retire_birthday": "2029-12-27",
+    "retire_extension_years": 0,
+    "extra_return_wan": 0,
+    "loan_pmt_wan": [
+      {
+        "name": "玉山房貸",
+        "wan_per_month": 3.4227,
+        "due_day": 28
+      },
+      {
+        "name": "玉山房貸",
+        "wan_per_month": 9.3294,
+        "due_day": 28
+      },
+      {
+        "name": "玉山信貸",
+        "wan_per_month": 1.961,
+        "due_day": 28
+      },
+      {
+        "name": "玉山信貸",
+        "wan_per_month": 6.4275,
+        "due_day": 23
+      },
+      {
+        "name": "玉山信貸",
+        "wan_per_month": 6.2393,
+        "due_day": 17
+      }
+    ]
   },
   "accounts": [
     {
@@ -145,7 +177,7 @@
       "id": "yunxiang",
       "name": "雲象",
       "category": "other",
-      "side": "asset",
+      "side": "reference",
       "liquid": false,
       "owner": "me",
       "active": true
@@ -157,7 +189,7 @@
       "side": "asset",
       "liquid": true,
       "owner": "me",
-      "active": true
+      "active": false
     },
     {
       "id": "yushan_loan",
@@ -196,7 +228,7 @@
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": true
+      "active": false
     },
     {
       "id": "taishin_car_loan",
@@ -214,7 +246,7 @@
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": true
+      "active": false
     },
     {
       "id": "dora_stock",
@@ -286,7 +318,7 @@
       "side": "asset",
       "liquid": true,
       "owner": "jinghan",
-      "active": true
+      "active": false
     },
     {
       "id": "jh_cash",
@@ -441,7 +473,8 @@
         "house": 2600.0,
         "land": 200.0,
         "xt_loan": -70.0
-      }
+      },
+      "monthly_kid_wan": 11.0
     },
     {
       "date": "2021-01-01",
@@ -455,7 +488,8 @@
         "yushan_loan": -500.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 11.0
     },
     {
       "date": "2021-02-01",
@@ -567,7 +601,8 @@
         "ctbc_bank": 2.9588,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2021-11-01",
@@ -581,7 +616,8 @@
         "ctbc_bank": 7.9218,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2021-12-01",
@@ -594,7 +630,8 @@
         "ctbc_bank": 15.8568,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-01-01",
@@ -607,7 +644,8 @@
         "ctbc_bank": 3.22,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-04-01",
@@ -623,7 +661,8 @@
         "primer": 100.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-05-01",
@@ -639,7 +678,8 @@
         "primer": 100.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-06-01",
@@ -655,7 +695,8 @@
         "primer": 100.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-08-01",
@@ -671,7 +712,8 @@
         "primer": 100.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-09-01",
@@ -687,7 +729,8 @@
         "primer": 100.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2022-10-01",
@@ -703,7 +746,8 @@
         "primer": 100.0,
         "house": 2600.0,
         "land": 200.0
-      }
+      },
+      "monthly_kid_wan": 8.7109
     },
     {
       "date": "2024-01-01",
@@ -726,7 +770,8 @@
         "leo_cash": 0.0332,
         "aaron_stock": 164.2691,
         "aaron_cash": 0.0332
-      }
+      },
+      "monthly_kid_wan": 1.5
     },
     {
       "date": "2024-02-01",
@@ -749,7 +794,8 @@
         "leo_cash": 0.0332,
         "aaron_stock": 164.0765,
         "aaron_cash": 0.0332
-      }
+      },
+      "monthly_kid_wan": 1.5
     },
     {
       "date": "2024-03-01",
@@ -773,7 +819,8 @@
         "leo_cash": 8.6334,
         "aaron_stock": 177.9684,
         "aaron_cash": 8.6334
-      }
+      },
+      "monthly_kid_wan": 1.5
     },
     {
       "date": "2024-04-01",
@@ -800,7 +847,8 @@
         "aaron_stock": 195.9106,
         "aaron_cash": 8.1605
       },
-      "qyld_yield": 0.063861
+      "qyld_yield": 0.063861,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-05-01",
@@ -827,7 +875,8 @@
         "aaron_stock": 197.1914,
         "aaron_cash": 7.8883
       },
-      "qyld_yield": 0.058472
+      "qyld_yield": 0.058472,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-06-01",
@@ -855,7 +904,8 @@
         "aaron_stock": 207.1109,
         "aaron_cash": 7.609
       },
-      "qyld_yield": 0.064739
+      "qyld_yield": 0.064739,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-07-01",
@@ -887,7 +937,8 @@
         "jh_loan": 131.565,
         "jh_cash": 8.6511
       },
-      "qyld_yield": 0.062137
+      "qyld_yield": 0.062137,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-08-01",
@@ -918,7 +969,8 @@
         "jh_stock": 172.6689,
         "jh_cash": 7.4998
       },
-      "qyld_yield": 0.060174
+      "qyld_yield": 0.060174,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-09-01",
@@ -949,7 +1001,8 @@
         "jh_stock": 172.421,
         "jh_cash": 7.9546
       },
-      "qyld_yield": 0.064854
+      "qyld_yield": 0.064854,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-10-01",
@@ -980,7 +1033,8 @@
         "jh_stock": 175.0374,
         "jh_cash": 7.3612
       },
-      "qyld_yield": 0.066816
+      "qyld_yield": 0.066816,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-11-01",
@@ -1011,7 +1065,8 @@
         "jh_stock": 181.3924,
         "jh_cash": 6.4746
       },
-      "qyld_yield": 0.060417
+      "qyld_yield": 0.060417,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2024-12-01",
@@ -1042,7 +1097,8 @@
         "jh_stock": 179.251,
         "jh_cash": 5.5988
       },
-      "qyld_yield": 0.062565
+      "qyld_yield": 0.062565,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-01-01",
@@ -1073,7 +1129,8 @@
         "jh_stock": 186.2498,
         "jh_cash": 5.0098
       },
-      "qyld_yield": 0.058844
+      "qyld_yield": 0.058844,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-02-01",
@@ -1104,7 +1161,8 @@
         "jh_stock": 190.7294,
         "jh_cash": 5.0129
       },
-      "qyld_yield": 0.07209
+      "qyld_yield": 0.07209,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-03-01",
@@ -1135,7 +1193,8 @@
         "jh_stock": 186.7751,
         "jh_cash": 8.681
       },
-      "qyld_yield": 0.084952
+      "qyld_yield": 0.084952,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-04-01",
@@ -1166,7 +1225,8 @@
         "jh_stock": 174.1957,
         "jh_cash": 8.0452
       },
-      "qyld_yield": 0.082191
+      "qyld_yield": 0.082191,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-05-01",
@@ -1198,7 +1258,8 @@
         "jh_stock": 174.1957,
         "jh_cash": 8.0452
       },
-      "qyld_yield": 0.074971
+      "qyld_yield": 0.074971,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-06-01",
@@ -1230,7 +1291,8 @@
         "jh_stock": 175.1656,
         "jh_cash": 6.3015
       },
-      "qyld_yield": 0.086321
+      "qyld_yield": 0.086321,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-07-01",
@@ -1262,7 +1324,8 @@
         "jh_cash": 5.6778,
         "yunxiang": 156.6538
       },
-      "qyld_yield": 0.079769
+      "qyld_yield": 0.079769,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-08-01",
@@ -1294,7 +1357,8 @@
         "jh_cash": 104.8239,
         "yunxiang": 153.5675
       },
-      "qyld_yield": 0.076391
+      "qyld_yield": 0.076391,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-09-01",
@@ -1326,7 +1390,8 @@
         "jh_cash": 77.3588,
         "yunxiang": 165.5144
       },
-      "qyld_yield": 0.073971
+      "qyld_yield": 0.073971,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-10-01",
@@ -1358,7 +1423,8 @@
         "jh_cash": 98.5552,
         "yunxiang": 175.719
       },
-      "qyld_yield": 0.07953
+      "qyld_yield": 0.07953,
+      "monthly_kid_wan": 3.0
     },
     {
       "date": "2025-11-01",
@@ -1390,7 +1456,9 @@
         "jh_cash": 45.146,
         "yunxiang": 161.0344
       },
-      "qyld_yield": 0.088709
+      "qyld_yield": 0.088709,
+      "monthly_kid_wan": 5.0,
+      "tesla_pmt_wan": 2.4
     },
     {
       "date": "2025-12-01",
@@ -1422,7 +1490,8 @@
         "jh_cash": 38.598,
         "yunxiang": 187.6659
       },
-      "qyld_yield": 0.068625
+      "qyld_yield": 0.068625,
+      "monthly_kid_wan": 5.0
     },
     {
       "date": "2026-01-01",
@@ -1455,7 +1524,9 @@
         "jh_cash": 32.8759,
         "yunxiang": 180.4481
       },
-      "qyld_yield": 0.060059
+      "qyld_yield": 0.060059,
+      "monthly_kid_wan": 4.5,
+      "tesla_pmt_wan": 2.1
     },
     {
       "date": "2026-02-01",
@@ -1488,7 +1559,9 @@
         "jh_cash": 26.5175,
         "yunxiang": 174.4746
       },
-      "qyld_yield": 0.060059
+      "qyld_yield": 0.060059,
+      "monthly_kid_wan": 4.5,
+      "tesla_pmt_wan": 2.1
     },
     {
       "date": "2026-03-01",
@@ -1521,7 +1594,9 @@
         "jh_cash": 11.0062,
         "yunxiang": 172.0354
       },
-      "qyld_yield": 0.060059
+      "qyld_yield": 0.060059,
+      "monthly_kid_wan": 4.5,
+      "tesla_pmt_wan": 2.1429
     }
   ]
 }
