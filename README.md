@@ -51,6 +51,8 @@
 
 ## 版本歷程
 
+- **V0.9.0** — 持股 Tab(美股配置追蹤+再平衡):嘉信+第一+永豐三家分開追蹤,加權年化報酬(8.40%/4.67% 對齊 Excel),嘉信 7 檔再平衡建議,Yahoo+雙代理股價 API,設定頁可編輯股數/現金/匯率/預定%/資金流,加 import_holdings.py
+- **V0.8.2** — 設計文件版:加 V0.9.0-DESIGN.md(持股 Tab 完整設計,給下次對話接手用),不動程式
 - **V0.8.1** — 資料更新到 2026/05;修 import_excel.py 漏抓 F4(monthly_kid_wan)和 I2(tesla_pmt_wan)的 bug
 - **V0.8.0** — 對齊 SELA-Starter-Kit V1.8.0(加 favicon、加 SELA logo banner、加 SELA-handoff、補齊 .gitignore;配色保留現有黑底金字)
 - **V0.7.1** — 修升級 bug:loadData 加 mergeSettings 補齊缺漏設定;貸款月繳全可編輯
@@ -79,4 +81,4 @@ SELA logo 永遠是橘 + 白(在 favicon 與 README banner 看到)。
 
 ---
 
-> Made by **Sela** · V0.8.1 · 對齊 SELA-Starter-Kit V1.8.0
+> Made by **Sela** · V0.8.2 · 對齊 SELA-Starter-Kit V1.8.0

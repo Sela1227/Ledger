@@ -21,6 +21,43 @@
 
 ---
 
+## ⚠️ V0.9.0 升版必讀
+
+V0.9.0 是**業務增量大版**:加「持股」整個新 tab 追蹤美股(嘉信 + 第一 + 永豐三家),加再平衡建議、加權年化報酬計算、Yahoo + 兩層反向代理股價 API、設定頁可編輯股數/現金/預定%/資金流。完整設計文件見 `V0.9.0-DESIGN.md`(已實作完成)。
+
+主要動作:
+- `DATA` 加 `holdings` 子物件:`brokers`、`positions`、`target_allocation_schwab`、`cash_by_broker`、`fxrate`、`fund_flows`、`quotes`
+- `td_us` 帳戶 name 從「TD 美股」改「美國券商」(id 不動,DEFAULT_DATA + EMBEDDED_HISTORY 兩處同步改)
+- 加 nav tab「持股」+ page slot + `renderHoldings` / `renderHoldingsAll` / `renderHoldingsBroker` / `renderPositionGroup` / `renderRebalance` / `renderFundFlowSummary`
+- 加演算法:`computeBrokerStats`(加權年化)、`computeBrokerMarketValue`、`computeAllHoldingsStats`、`computeRebalance`、`computeLedgerAlignment`
+- 加 API:`fetchQuote`(Yahoo 直連 → r.jina.ai → corsproxy.io 三層 fallback)、`refreshAllQuotes`(並行抓、失敗保留舊 quote)
+- 設定頁加「持股設定」整段:匯率/三家現金/三家持股清單(可改股數/tier/刪除/新增)/嘉信預定%/資金流加單筆/全清
+- `loadData()` 加 holdings 補齊邏輯:深拷貝 DEFAULT_DATA.holdings(避免引用穿透)
+- 加 `import_holdings.py`:Excel fund_flows → JSON,匯入大量歷史資金流用
+- 看坑 #31
+
+未動的東西:
+- Excel 12 條公式對齊不變(V0.6 退休試算)
+- 凍結機制不變(V0.7 computed)
+- 配色 / 章節結構 / 帳戶 ID 不變(V0.8 對齊 Kit 後決定)
+- 月度資產表(snapshots)不變,持股**不存 snapshot**(只存 DATA.holdings,即時的)
+
+**部署選項**:
+- 選項 A(推薦):清空目錄,推 V0.9.0.zip → 用戶 localStorage 自動補齊 holdings(loadData 深拷貝 DEFAULT_DATA.holdings)
+- 選項 B(機密考量):先匯出 JSON 備份,再升版,再匯入
+
+**動工驗算對齊**(V0.9.0 已驗證):
+- 嘉信合成等價資金流 → 8.40% 年化(目標 8.42%,差 0.02pp 是設計文件 profit 數字本身的精度差)
+- 永豐合成等價資金流 → 4.67% 年化(完全吻合)
+- 算法用 USD 加權平均(以 USD 金額 × 天數加權),(1+ratio)^(365/weighted_days) - 1
+
+**Sela 後續要補的**(不擋功能):
+- 嘉信 VPL / VWO / O 股數(目前 0,顯示「0%/預定 12%」)
+- 嘉信「個股」其他 ~6 檔、「投機」其他 ~5 檔(設定頁手動加)
+- 全部 fund_flows(嘉信 17 + 永豐 72 筆)從 Excel 用 `import_holdings.py` 匯入
+
+---
+
 ## ⚠️ V0.8.0 升版必讀
 
 V0.8.0 是**首次對齊 SELA-Starter-Kit V1.8.0**(走 Kit cross-project-pitfalls #40 的「對齊既有專案 SOP」)。看坑 #29。
@@ -82,13 +119,22 @@ V0.7 凍結機制全部繼承,Excel 12 條公式對齊最新月份不變。
 ```js
 {
   version: 2,
-  settings: { retirement_target_wan, qyld_yield, monthly_expense_wan },
+  settings: { retirement_target_wan, qyld_yield, monthly_expense_wan, ... },
   accounts: [{ id, name, category, side, liquid, owner, active, auto? }],
-  snapshots: [{ date: 'YYYY-MM-DD', balances: { acc_id: number_in_wan } }]
+  snapshots: [{ date: 'YYYY-MM-DD', balances: { acc_id: number_in_wan } }],
+  holdings: {  // V0.9.0 加
+    brokers: [{ id, name, ledger_id, currency, rebalance }],         // 3 家:嘉信/第一/永豐
+    positions: [{ symbol, broker, shares, tier }],                    // 30 筆 - tier: core/satellite/stock/speculative
+    target_allocation_schwab: { TICKER: pct },                        // 嘉信 7 檔目標 %(合計 66%,其餘自由)
+    cash_by_broker: { schwab, firstrade, sinopac },                   // 各家現金 USD
+    fxrate: number, fxrate_updated_at: 'YYYY-MM-DD',                  // 手動匯率(不抓 API)
+    fund_flows: { schwab: [{date, amount_usd, fxrate}], ... },        // 給加權年化算的歷史匯入
+    quotes: { TICKER: { price, at } },                                // refreshAllQuotes 寫入
+  },
 }
 ```
 
-**金額單位永遠是「萬」**(跟 Sela Excel 一致)。負債用負數。Snapshots 不要存衍生欄位(總資產、負債比都用算的)。
+**金額單位永遠是「萬」**(跟 Sela Excel 一致),**只有 holdings 是 USD 為主**(對齊嘉信/永豐 Excel)。負債用負數。Snapshots 不要存衍生欄位(總資產、負債比都用算的)。**holdings 不進 snapshot**(即時的,跟月度快照分離)。
 
 ---
 
@@ -139,6 +185,20 @@ V0.7 凍結機制全部繼承,Excel 12 條公式對齊最新月份不變。
 - **QYLD 年化報酬率每月在變動** — Sela 每月 1 號實際去查 QYLD 近 5 年含息年化,寫進 Excel 的 D19。app 端也是每快照記一次,別假設它是固定值。
 - **玉山房貸名稱後括號是「繳款日」不是「年限」** — Excel I3 寫「玉山房貸(28)」是指每月 28 號要繳款,提醒 Sela 用。**不是貸款 28 年**。`settings.loan_pmt_wan[i].due_day` 存這個。
 - **2029/12/27 是 Sela 50 歲生日** — 退休試算的 anchor。`settings.retire_birthday`。改不改是 Sela 的事(只能改提早或延後)。
+
+下面是 V0.9.0 持股 Tab 相關的業務事實(設計文件 `V0.9.0-DESIGN.md` 動工時必看):
+
+- **td_us 帳戶顯示名稱「美國券商」(V0.9.0 改),實際涵蓋嘉信(主)+ 第一證券(副)兩家**。`id` 維持 `td_us` 不動(改 id 會破壞 6 年快照),只改 `name`。「TD」是歷史包袱(TD Ameritrade 已 2020 併入嘉信)。
+- **永豐 Excel R1 標題「TD Ameritrade 867238065」是抄錯**,實為永豐複委託。Sela 確認過,複製貼上沒清。下次匯入腳本看到不要當 bug。
+- **永豐 QQQ 102.5 股 = 主追蹤 72.5 + 定期定額 30**(碎股因兩種買法產生)。Excel 在主清單 R11 + 投資對照 R19 分兩處顯示,程式合併成一筆 102.5 股。
+- **永豐「投資對照」AMZN/QQQ/MSFT/UBER 是現在持有,不是想買清單** — Sela 確認過,Excel 主清單漏列了,下次匯入要把這 4 檔合併進永豐持股。
+- **永豐「主追蹤 8 檔 + 雜部位 USD 24,307」 程式合併當一個清單** — Excel 結構亂(歷史遺留兩種展示),但實際是同一份持股,匯入時不拆兩層。
+- **第一證券持股 = TLT 600 股 + LENZ 2000 股** + 現金 USD 2,319(V0.9.0 動工已確認)。Excel 沒明確分配,V0.8.2 起在 `DATA.holdings.positions[broker='firstrade']` 兩筆寫死。
+- **嘉信 LENZ 是 4000 股**(V0.9.0 動工 Sela 確認)。第一也有 LENZ 2000 股、永豐也有 LENZ 2200 股 — 三家都持有同一檔,合計 8200 股。Excel R12=2000、R22=4000 是嘉信內部分批買的歷史紀錄,實際倉位 4000(不是 6000、不是 2000)。
+- **嘉信再平衡只追 7 檔**(V0.9.0 動工 Sela 確認簡化):核心 4 檔 VTI 24% / VGK 18% / VPL 12% / VWO 6% + 能源 3 檔 VDE 3% / ICLN 2% / URNM 1%,合計 66%。**O / TLT / QYLD / 個股 / 投機**全部不設預定 %,視為自由部位(34%)。原設計文件 9 檔(含 O 5%、TLT 3.24%)已過時。
+- **加權年化報酬演算法**:嘉信 8.42% / 永豐 4.67%(從 Excel 反推)。V0.9.0 用合成等價資金流驗算:嘉信 8.40%(差 0.02pp,在精度容差內)、永豐 4.67%(完全吻合)。公式 `(1+profit_ratio)^(365/weighted_days) - 1`,`weighted_days = Σ(amount_usd × days) / Σ(amount_usd)`。看 `index.html` `computeBrokerStats()`。
+- **持股是即時的,不像資產表是月度快照** — 不存進 snapshot,只存 `DATA.holdings`。凍結機制不影響 holdings。
+- **持股對齊 Ledger 帳戶不主動覆寫** — 嘉信 + 第一 持股總和對齊 td_us、永豐對齊 sinopac_us;差 > 1% 顯示警告,讓 Sela 自己決定改哪邊。延續 V0.7 凍結機制精神:既定事實優先。
 
 ---
 
@@ -327,6 +387,21 @@ V0.7 凍結機制全部繼承,Excel 12 條公式對齊最新月份不變。
     - 邊界:`extract_yunxiang_and_qyld` 命名已不準確(現在抓 4 個欄位),但保留命名避免改太多。下版有空可重命名為 `extract_dynamic_fields()`
     - 對齊驗證:修補後重匯一次,跟 V0.8.0 既有 ledger-history.json 比對,**0 筆差異**(除了新月份 2026-05)
 
+31. **holdings 升級補齊要深拷貝,否則 saveData 寫穿 DEFAULT_DATA** (V0.9.0 教訓)
+    - 症狀:V0.8.x 升 V0.9.0 時,舊 localStorage 沒有 `holdings` 子物件,要從 `DEFAULT_DATA.holdings` 補進來
+    - 原因:如果直接 `stored.holdings = DEFAULT_DATA.holdings`,兩者共用同一物件記憶體;之後 `saveData()` 把 stored 寫回 localStorage 雖然不影響 DEFAULT_DATA(常數已被序列化覆蓋),但**同一個 session 裡 stored.holdings 跟 DEFAULT_DATA.holdings 是同個 reference**,改一邊另一邊也變
+    - 做法:`loadData()` 用 `JSON.parse(JSON.stringify(DEFAULT_DATA.holdings))` 深拷貝再賦值,徹底切斷 reference
+    - 邊界:這個坑只在「新欄位首次出現」時會踩(每次 schema 加 root-level 物件都要深拷貝補齊)。坑 #27 mergeSettings 處理 settings 子欄位是同一精神
+    - 同類保險:V0.9.x 之後若 holdings 又加新子欄位(例如 `holdings.alerts`),loadData 還要再加更細的子欄位補齊邏輯,不能假設「holdings 存在就什麼都有了」
+
+32. **zip 命名要照 Kit 鐵律 #0:用專案名 + 空格分隔 + 點版號** (V0.9.0 教訓)
+    - 症狀:V0.9.0 連續打錯兩次。第一次 `Ledger_V0_9_0.zip`(底線錯),Sela 指出「給檔格式沒有照規範」;第二次自作主張把專案名翻成中文 `資產札記 V0.9.0.zip`,Sela 再指「程式就叫 Ledger,不要任意改名」
+    - 原因:Kit 鐵律 #0 寫「`<專案名稱> V<版本>.zip`」但沒明寫「專案名 = 給我的 zip 檔名前段」。我看到 README/index.html 的「資產札記 Ledger」雙語並陳,以為中文是「正式名」 — **錯**。專案名以 Sela 上傳的 zip 檔名為準(`Ledger_V0_8_x.zip` → 程式叫 Ledger),資料夾內容名(中文「資產札記」)是 UI 品牌、不是專案名
+    - 做法:**本專案 zip 名 = `Ledger V<點版號>.zip`**(英文 Ledger、空格、V 大寫、版號用點)
+    - 反例:`Ledger_V0_9_0.zip`(底線)、`Ledger-V0.9.0.zip`(連字號)、`資產札記 V0.9.0.zip`(改名)、`ledger v0.9.0.zip`(小寫)、`Ledger V0.9.zip`(版號漏一位)— 全錯
+    - 打包指令:`zip -r "Ledger V$VER.zip" 資產札記` — 注意 zip 檔名是 Ledger、但壓縮的資料夾名是「資產札記」(這兩個不一樣,別混)
+    - 對照 Kit `CLAUDE.md` §3「關於交付」:「✗ 不用 `<名稱>_V1.0.0.zip`(底線)或 `<名稱>-V1.0.0.zip`(連字號)——用空格分隔」
+
 ---
 
 ## 五、關鍵路徑(改 X 功能動哪幾個地方)
@@ -345,7 +420,11 @@ V0.7 凍結機制全部繼承,Excel 12 條公式對齊最新月份不變。
 | **改代管頁** | `function renderCustodial(` |
 | **改月輸入流程** | `function renderSnapshot(` + `function goToSnapshot(` + `function saveSnapshot(` |
 | **改攤還公式** | `function calcAmortizeNext(` |
-| **改設定頁** | `function renderSettings(` |
+| **改設定頁** | `function renderSettings(` + `function renderHoldingsSettings(` |
+| **改持股 tab(V0.9.0)** | `function renderHoldings(` + `function renderHoldingsBroker(` + `function renderRebalance(` |
+| **改加權年化演算法** | `function computeBrokerStats(` |
+| **改股價 API fallback 順序** | `async function fetchQuote(` |
+| **改持股對齊 Ledger 邏輯** | `function computeLedgerAlignment(` |
 | **改幫助說明** | `function openHelpModal(` |
 
 `renderAll()` 把四個 render 都跑一次,儲存後一律呼叫它。**不要嘗試做局部更新**,這專案規模不值得。
@@ -389,6 +468,8 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 ## 七、版本歷程(只留近期)
 
+- **V0.9.0** — 持股 Tab(美股配置追蹤+再平衡):加 `DATA.holdings`(brokers/positions/target_allocation_schwab/cash/fxrate/fund_flows/quotes)、加「持股」整個新 tab(全部/嘉信/第一/永豐 4 子 tab,核心/衛星/個股/投機 4 tier 摺疊群組,再平衡建議,對齊 Ledger 警示,加權年化報酬)、加 Yahoo + 兩層反向代理股價 API、設定頁可編輯股數/現金/匯率/預定%/資金流、加 `import_holdings.py` 從 Excel 匯入大量資金流。td_us 改名「美國券商」(嘉信+第一兩家合計)。再平衡簡化成 7 檔(原設計 9 檔)合計 66%。看升版必讀 + 坑 #31
+- **V0.8.2** — 設計文件版:加 `V0.9.0-DESIGN.md`(完整持股 tab 設計,給下次對話接手 V0.9.0 用),不動程式。本版理由:V0.9.0 規模大(~+1200 行)且本對話 context 已用很多,選擇先把設計沉澱成文件,避免半成品;設計含三家券商架構、加權報酬演算法、股價 API 三層 fallback、Excel 兩份匯入規則、Sela 5 輪討論的決策追溯
 - **V0.8.1** — 資料更新 + 修 import bug:加入 2026/05 月份(58 筆)、修 import_excel.py 沒抓 F4(`monthly_kid_wan`)和 I2(`tesla_pmt_wan`)的 bug,未來重匯 Excel 不會再清空這兩欄(看坑 #30)
 - **V0.8.0** — 首次對齊 SELA-Starter-Kit V1.8.0:加 favicon 套組(svg/png/ico/manifest)、index.html `<head>` 改用 SELA 標準引用、README 加 SELA logo banner、`.gitignore` 補 Kit 標準項目、產出 SELA-handoff.md、CLAUDE.md 開頭加衝突仲裁區塊。配色/章節結構/業務邏輯全部保留(看坑 #29)
 - **V0.7.1** — 修正 V0.7 升級 bug:`loadData` 加 `mergeSettings` 補齊缺漏設定;貸款月繳改全可編輯(名稱/繳款日/增/刪);Topbar 加版本號 pill
@@ -397,7 +478,6 @@ print('✅ 2025/09 總資產對齊 Excel')
 - **V0.6.1** — 首頁 UX 重構:帳戶列表改摺疊群組(預設加總、點開看細項)、自定義分組對齊 Sela 會計概念、自動停用 4 個歷史殘留帳戶
 - **V0.6.0** — 退休試算重構:對齊 Excel 12 條公式;加 reference side(雲象)、normal_liab、settings.salary/card/loan_pmt_wan/birthday/retire_extension;快照加 monthly_kid_wan/tesla_pmt_wan
 - **V0.5.1** — 公式語意修正:編輯舊月份不主動套用公式,改顯示「期望 vs 實際」對帳資訊
-- **V0.5.0** — 退休目標自動算、每快照存 yld、mantou 改 formula、show_inactive_accounts toggle、按鈕「快照」改「資產表」
 
 ---
 
@@ -405,14 +485,16 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 按優先序:
 
-1. **正式部署到 GitHub Pages 並在手機驗證 PWA 加主畫面** — 上線前必備:Sela 還沒實際在 iPhone Safari 上測過「加入主畫面」流程
-2. 寫 Service Worker 做離線快取
-3. 圖表加 tooltip(點/hover 顯示該月詳細數字)
-4. 雲象的「淨資產收益率」獨立指標(雲象 × 14/15 的累積走勢)
-5. 加「年度報表」分頁:每年資產增減、報酬率、配息估算
-6. 攤還參數可在 UI 改
-7. 匯出 CSV
-8. 多語系
+1. **V0.9.x — Sela 補資料、實機測整套** — V0.9.0 上線後第一優先:Sela 補嘉信 VPL/VWO/O 股數、補嘉信「個股 / 投機」其他 ~10 檔、用 `import_holdings.py` 匯入 89 筆 fund_flows、實機看股價 API 哪一層 fallback 在用。動工前必問:股價有抓到嗎?Yahoo 直連被擋還是過了?
+2. PWA 在 iPhone 實機驗證加主畫面流程(從 V0.8.x 起一直延後,V0.9.0 業務告一段落後該補)
+3. 寫 Service Worker 做離線快取
+4. 圖表加 tooltip(點/hover 顯示該月詳細數字)
+5. 持股歷史走勢圖(每次 refreshAllQuotes 把 today_market_usd 寫進新表 `holdings_snapshots`,看走勢)
+6. 雲象的「淨資產收益率」獨立指標(雲象 × 14/15 的累積走勢)
+7. 加「年度報表」分頁:每年資產增減、報酬率、配息估算
+8. 攤還參數可在 UI 改
+9. 匯出 CSV
+10. 多語系
 
 ### 不在優先序裡:隱私強化(Cloudflare Access / 抽歷史出程式)
 
@@ -432,4 +514,4 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 ## 九、一句話總結
 
-V0.8.1 是資料更新版:Sela 拿了新版 Excel(含 2026/05),重新匯入時發現 import_excel.py 從沒讀 F4(一菜雙石)和 I2(特斯拉車貸),會清空所有既有歷史的這兩欄。修補腳本 + 重匯後比對 V0.8.0 資料 0 筆差異(除新月份),snapshots 從 57 → 58 筆。Excel 12 條公式 + 凍結機制 + Kit 對齊全部繼承。下版第一優先還是 PWA 在 iPhone 實機驗證加主畫面流程。
+V0.9.0 業務增量大版:加「持股」整個新 tab(嘉信+第一+永豐三家美股配置追蹤)、加權年化報酬演算法用合成資料反推 Excel 對齊(8.40% / 4.67%)、Yahoo + 兩層反向代理股價 API、嘉信再平衡建議簡化成 7 檔(VTI/VGK/VPL/VWO + VDE/ICLN/URNM)合計 66%、設定頁全可編輯股數/現金/匯率/預定%/資金流、加 `import_holdings.py` 從 Excel 匯入 89 筆歷史資金流。td_us 改名「美國券商」(實涵嘉信+第一)。加坑 #31:loadData 補齊 holdings 必須深拷貝 DEFAULT_DATA(否則 reference 穿透)。下版第 1 優先:Sela 實機看股價 API 哪一層 fallback 在用 + 補 VPL/VWO/O 股數和其他 ~10 檔個股/投機。
