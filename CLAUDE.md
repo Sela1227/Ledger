@@ -5,27 +5,57 @@
 
 ---
 
-## ⚠️ V0.7.0 升版必讀
+> **⚠ 給同時拿到 SELA-Starter-Kit 的 Claude:**
+> 這是**已對齊 Kit V1.8.0 的成熟專案**(V0.8.0 起),不是新專案。
+>
+> 衝突仲裁規則:
+> 1. **以本專案 CLAUDE.md 為主、Kit 為輔**
+> 2. 本專案刻意不對齊 Kit 的部分:
+>    - **配色保留「黑底金字」**(`--bg: #0e0d0b` / `--gold: #d4b074`),非 Kit 預設「SELA 主題橘 #F36825」也非「北歐霧藍 #5A7A8B」 — Sela 的設計選擇,理由是長時間看資產想要沉浸式深色降低焦慮感,已驗證 7 個版本
+>    - **`theme-color` meta 用 `#0e0d0b`**(配合 PWA 啟動畫面),非 Kit logo/CLAUDE.md 4.1 預設的 `#F36825`
+>    - **CLAUDE.md 章節結構保留**(累積 28+ 條坑、業務事實、版本歷程),不依 templates/CLAUDE-template.md 重排 — 結構已符合 conventions/CLAUDE-MD-章法.md 規範
+>    - **帳戶 ID 中拼混合**(yunxiang / mantou / yushan_loan / taishin_car_loan)— 對映 Excel 既有業務術語,不對齊「全英」風格
+> 3. **不要為對齊 Kit 而動既有設計** — 已驗證的就是事實標準
+> 4. SELA logo 鐵律照走:橘 + 白,不改色、不重畫、保留 ®(Kit logo/CLAUDE.md §3 鐵律)
+> 5. 版號規則照 Kit:三位數、空格分隔、部署版無後綴
 
-V0.7.0 是**凍結機制**:Sela 不想之後改公式或設定影響到舊月份的歷史紀錄。看坑 #24~#26。
+---
 
-核心規則:
+## ⚠️ V0.8.0 升版必讀
 
-| 場景 | 行為 |
-|---|---|
-| 最新一張快照(後面沒更新的) | **活的** — 跟著 settings/公式變動 |
-| 非最新快照(已被下一張接續) | **凍結** — 讀 `snapshot.computed`,不再變 |
-| 儲存「下一張」資產表時 | 自動凍結「上一張」 |
-| 編輯非最新月份 | 只改 balances,computed 不變 |
-| 編輯最新月份 | 用當前公式重算(因為它還是活的) |
-| 新建中間月份(後面已有更新的) | 一儲存就立刻凍結(不可能變最新了) |
-| 啟動 V0.7 | 自動把所有「非最新且沒 computed」的快照凍結 |
+V0.8.0 是**首次對齊 SELA-Starter-Kit V1.8.0**(走 Kit cross-project-pitfalls #40 的「對齊既有專案 SOP」)。看坑 #29。
 
-逃生口:設定頁加「強制重新凍結所有歷史」按鈕(用當前公式重算覆蓋)。
+主要動作:
+- 加 `favicon/` 整套(svg / 多尺寸 png / ico / site.webmanifest)
+- `index.html <head>` 改用 SELA 標準 favicon 引用,移除舊的 `data:` URL inline favicon
+- README.md 加 SELA logo banner + 重寫描述
+- `.gitignore` 補齊 Kit 標準項目(原本 12 行 → 49 行,加 Flet / node / build/ / *.egg-info 等)
+- 產出 `SELA-handoff.md`(首次對齊 Kit 是重大里程碑,Kit 規範強制要求)
+- topbar 版本號 v0.7.1 → v0.8.0
 
-V0.6.x 的 Excel 12 條公式對齊全部繼承(對最新月份),凍結後的歷史則固定為「凍結當下的公式結果」。
+未動的東西:
+- 配色保留(見上方衝突仲裁第 2 條)
+- CLAUDE.md 章節結構保留
+- 12 條 Excel 公式對齊不變(全部測試重跑通過)
+- 凍結機制不變(V0.7 的 computed / getStats / freezeSnapshot)
 
-⚠️ **V0.7 第一次啟動,所有歷史會用當前公式凍結一次**。意思是即使 2025/09 那時候沒有台新車貸,凍結後的「月支出」也會包含車貸 2.1429(因為今天 settings 有車貸)。這是「以今天的眼光回算歷史」,使用者可接受就用,不接受就之後手動改該月再「強制重凍」。
+**部署選項**:
+- 選項 A(推薦):清空目錄,推 V0.8.0.zip → 用戶 localStorage 保留(不會被清掉,因為瀏覽器層)
+- 選項 B(機密考量):先匯出 JSON 備份,再升版,再匯入
+
+---
+
+## ⚠️ V0.7.1 升版必讀
+
+V0.7.1 是 **V0.7 的修正補強版**:Sela 用手機開設定頁,**完全看不到任何貸款項目**。看坑 #27、#28。
+
+主要修正:
+- `loadData()` 加 `mergeSettings()`:升級時用 DEFAULT_DATA 補齊缺少的設定欄位(loan_pmt_wan / salary / birthday 等)
+- 貸款月繳卡片改成**完全可編輯**:名稱可改、繳款日可改、可刪除、可新增(`addLoan` / `removeLoan` / `updateLoanField`)
+- 卡片 top 區改用 `<input>` 而非 `<span>`,點下去可直接改名稱
+- Topbar 加版本號顯示 `v0.7.1`(金色 pill,清楚知道用到哪版)
+
+V0.7 凍結機制全部繼承,Excel 12 條公式對齊最新月份不變。
 
 **部署選項(Sela 已選 A)**:
 
@@ -262,6 +292,41 @@ V0.6.x 的 Excel 12 條公式對齊全部繼承(對最新月份),凍結後的歷
       - 編輯**非最新但還沒凍結**(舊資料) → 用當前公式凍結一次
     - 邊界:這代表編輯舊月份的 balances 不會反映在「離退休還差」之類的衍生欄位,Sela 知道這是 by design
 
+27. **localStorage 升級時不會自動補上新欄位** (V0.7.1 教訓)
+    - 症狀:Sela 從 V0.6 升 V0.7,手機開設定頁完全看不到任何貸款項目(預載的 6 筆消失)
+    - 原因:`loadData()` 從 localStorage 拿到舊 settings(沒 loan_pmt_wan),直接 return,DEFAULT_DATA 的預載被忽略
+    - 做法:V0.7.1 加 `mergeSettings(defaults, stored)`:用 stored 為主、defaults 補齊缺漏。空陣列也視為「缺漏」改用 defaults
+    - 邊界:**不要直接覆蓋 stored 設定** — Sela 之前改過的值要保留(例如她把 qyld_yield 改成 0.06,升級後仍應是 0.06,不該被 reset 成 default 的 0.0739)
+    - 副作用:升級後第一次打開,空的設定欄位會自動填上預設值,Sela 看到的不是「空白」而是「預載」
+
+28. **貸款月繳要可增刪改** (V0.7.1 設計補充)
+    - 症狀:V0.6/V0.7 的貸款月繳是寫死 6 筆,使用者無法增加/刪除
+    - 原因:當時為了省事直接 hardcode
+    - 做法:V0.7.1 改成完全可編輯
+      - 名稱可改(`<input type="text">`)
+      - 繳款日可改(1-31 數字輸入框)
+      - 可刪除(每張卡片右上 ✕,confirm 後刪)
+      - 可新增(底部「+ 新增貸款」虛線按鈕,點下加一筆「新貸款 0 萬/月,1 號」)
+    - 注意:`computeTotalLoanPmt` 仍以「名稱=台新車貸」當判斷,**如果使用者改名,Tesla 智慧合併會失效**。可接受,因為使用者改名通常是有意為之
+
+29. **首次對齊 SELA-Starter-Kit V1.8.0** (V0.8.0 教訓 + 紀錄)
+    - 症狀:Ledger 跑了 7 個版本沒整合 SELA 品牌資產(沒 logo、沒 favicon),favicon 是用土法 inline `data:` URL 寫了個 serif「資產」中文字
+    - 原因:Ledger 起源於 V0.1 MVP 時還沒接 Kit,Kit V1.8.0 才出 + Sela 才提供 starter kit zip
+    - 做法:走 Kit cross-project-pitfalls #40 的「對齊既有專案 SOP」(四級分類法):
+      - 🔴 鐵律:加 favicon 整套、`<head>` 改用 SELA 標準 favicon 引用、`.gitignore` 補齊 Kit 標準項目、README 加 SELA logo banner、產出 SELA-handoff.md
+      - 🟡 建議:CLAUDE.md 開頭加 Kit 衝突仲裁區塊
+      - 🟢 順便:topbar 版本號改 v0.8.0、PWA manifest name 從「資產札記」改「資產札記 Ledger」對齊 README
+      - ✗ 不做:配色保留(個人選擇,已驗證 7 版)、CLAUDE.md 章節結構保留(已符合章法手冊)、帳戶 ID 中拼混合保留(對映 Excel 業務術語)
+    - 重點教訓:**Kit 規範不是法律**,衝突時以本專案 CLAUDE.md 為主、Kit 為輔。但「鐵律」(zip 命名、必含 .gitignore、必含 SELA logo)違反就壞,沒得商量
+    - 影響範圍:純對齊版,**Excel 12 條公式對齊不變**、凍結機制不變、所有業務邏輯不變 — 只動了品牌資產、文件結構、版本號顯示
+
+30. **import_excel.py 漏抓 F4(monthly_kid_wan)和 I2(tesla_pmt_wan)** (V0.8.1 教訓)
+    - 症狀:V0.8.1 重新匯入新版 Excel 時,所有 39 筆既有有 monthly_kid_wan 的快照都被清成 None,變相弄丟一菜雙石歷史資料
+    - 原因:V0.6 把 `monthly_kid_wan` 加進資料模型時,只在前端 saveSnapshot 寫,但 import_excel.py 的 `extract_yunxiang_and_qyld()` 沒同步加 F4 / I2 讀取邏輯。**「資料模型 ↔ 匯入腳本」沒對齊**(類似 Kit 坑 #1 的三方對齊事故)
+    - 做法:`extract_yunxiang_and_qyld()` 補上 F4(一菜雙石+儲備 → monthly_kid_wan)和 I2(特斯拉車貸,元 ÷ 10000 → tesla_pmt_wan),main() 把這兩個欄位寫入 snapshot
+    - 邊界:`extract_yunxiang_and_qyld` 命名已不準確(現在抓 4 個欄位),但保留命名避免改太多。下版有空可重命名為 `extract_dynamic_fields()`
+    - 對齊驗證:修補後重匯一次,跟 V0.8.0 既有 ledger-history.json 比對,**0 筆差異**(除了新月份 2026-05)
+
 ---
 
 ## 五、關鍵路徑(改 X 功能動哪幾個地方)
@@ -324,13 +389,15 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 ## 七、版本歷程(只留近期)
 
+- **V0.8.1** — 資料更新 + 修 import bug:加入 2026/05 月份(58 筆)、修 import_excel.py 沒抓 F4(`monthly_kid_wan`)和 I2(`tesla_pmt_wan`)的 bug,未來重匯 Excel 不會再清空這兩欄(看坑 #30)
+- **V0.8.0** — 首次對齊 SELA-Starter-Kit V1.8.0:加 favicon 套組(svg/png/ico/manifest)、index.html `<head>` 改用 SELA 標準引用、README 加 SELA logo banner、`.gitignore` 補 Kit 標準項目、產出 SELA-handoff.md、CLAUDE.md 開頭加衝突仲裁區塊。配色/章節結構/業務邏輯全部保留(看坑 #29)
+- **V0.7.1** — 修正 V0.7 升級 bug:`loadData` 加 `mergeSettings` 補齊缺漏設定;貸款月繳改全可編輯(名稱/繳款日/增/刪);Topbar 加版本號 pill
 - **V0.7.0** — 凍結機制:加 `snapshot.computed` 存凍結值,`getStats()` 包裝(最新→即時/非最新→讀凍結),`saveSnapshot` 儲存下一張時凍結上一張,啟動時自動凍結舊資料,設定頁加「強制重新凍結」逃生口
 - **V0.6.2** — 手機 UX 修正:貸款月繳改卡片式 UI、所有設定輸入改 `oninput` + `inputmode="decimal"`、`updateSetting` 不再 renderAll(避免輸入框失焦);settings 加台新車貸,snapshot.tesla_pmt_wan 覆蓋 settings 值
-- **V0.6.1** — 首頁 UX 重構:帳戶列表改摺疊群組(預設加總、點開看細項)、自定義分組對齊 Sela 會計概念(台幣銀行/外幣/雲象參考各自獨立)、退休後月領改 key-tile 一行式、自動停用 4 個歷史殘留帳戶
-- **V0.6.0** — 退休試算重構:對齊 Excel 12 條公式(F2 月支出、F5 貸款月繳、D6 還差、D7 退休年、I11~I18 退休試算、I9 美股、G13 菜石差額);加 reference side(雲象)、normal_liab(排除 formula 類);加 settings.salary/card/loan_pmt_wan/birthday/retire_extension;快照加 monthly_kid_wan/tesla_pmt_wan
-- **V0.5.1** — 公式語意修正:編輯舊月份不主動套用公式,改顯示「期望 vs 實際」對帳資訊(✓/⚠);新增模式維持 readonly 自動算
-- **V0.5.0** — 退休目標改自動算(月支出×12÷yld)、每快照存當月 yld、mantou 改 formula 自動算、加 show_inactive_accounts toggle、按鈕「快照」改「資產表」、匯入腳本支援 C21 雲象 + D19 yld
-- **V0.4.0** — 加密碼登入(SHA-256)、內嵌歷史改顯式載入、匯入改合併、清空保留帳戶結構、設定頁加登出按鈕、Help modal 重寫
+- **V0.6.1** — 首頁 UX 重構:帳戶列表改摺疊群組(預設加總、點開看細項)、自定義分組對齊 Sela 會計概念、自動停用 4 個歷史殘留帳戶
+- **V0.6.0** — 退休試算重構:對齊 Excel 12 條公式;加 reference side(雲象)、normal_liab、settings.salary/card/loan_pmt_wan/birthday/retire_extension;快照加 monthly_kid_wan/tesla_pmt_wan
+- **V0.5.1** — 公式語意修正:編輯舊月份不主動套用公式,改顯示「期望 vs 實際」對帳資訊
+- **V0.5.0** — 退休目標自動算、每快照存 yld、mantou 改 formula、show_inactive_accounts toggle、按鈕「快照」改「資產表」
 
 ---
 
@@ -365,4 +432,4 @@ print('✅ 2025/09 總資產對齊 Excel')
 
 ## 九、一句話總結
 
-V0.7.0 凍結機制版:Sela 不想之後改公式或設定影響歷史紀錄,設計成「最新月份是活的、儲存下一張時凍結上一張」,凍結值存進 `snapshot.computed` 區塊;`getStats()` 包裝函式判斷「最新→即時 / 非最新→讀凍結」;啟動時自動凍結所有舊資料(用當前公式算一次),設定頁加「強制重新凍結」逃生口。Excel 12 條公式仍對齊最新月份。下版第一優先還是 PWA 在 iPhone 實機驗證加主畫面流程。
+V0.8.1 是資料更新版:Sela 拿了新版 Excel(含 2026/05),重新匯入時發現 import_excel.py 從沒讀 F4(一菜雙石)和 I2(特斯拉車貸),會清空所有既有歷史的這兩欄。修補腳本 + 重匯後比對 V0.8.0 資料 0 筆差異(除新月份),snapshots 從 57 → 58 筆。Excel 12 條公式 + 凍結機制 + Kit 對齊全部繼承。下版第一優先還是 PWA 在 iPhone 實機驗證加主畫面流程。

@@ -270,6 +270,8 @@ def extract_yunxiang_and_qyld(ws):
     """
     從 C21 抓雲象股價(2025/07 之後位置改變,A 欄不再有)
     從 D19 抓 QYLD 年化報酬率(每月實際值,非固定)
+    從 F4 抓「一菜雙石+儲備」 → monthly_kid_wan(F4 是逐月變動的)
+    從 I2 抓特斯拉車貸月繳 → tesla_pmt_wan(I2 是逐月變動,2025/11 起出現)
     """
     out = {}
     # C19 = 'QYLD 年化報酬率', D19 = 0.0739...
@@ -283,6 +285,17 @@ def extract_yunxiang_and_qyld(ws):
             out['_qyld_yield'] = float(d_value)
         elif c_label == '雲象' and isinstance(d_value, (int, float)):
             out['yunxiang'] = float(d_value)
+
+    # F4 = 一菜雙石+儲備(萬,逐月變動)— monthly_kid_wan
+    f4 = ws['F4'].value
+    if isinstance(f4, (int, float)) and f4 > 0:
+        out['_monthly_kid_wan'] = float(f4)
+
+    # I2 = 特斯拉車貸月繳(元,逐月變動;2025/11 後才出現)— tesla_pmt_wan(轉換成萬)
+    i2 = ws['I2'].value
+    if isinstance(i2, (int, float)) and i2 > 0:
+        out['_tesla_pmt_wan'] = float(i2) / 10000.0  # 元 → 萬
+
     return out
 
 
@@ -324,9 +337,11 @@ def main():
         # 景翰
         jh_balances = extract_jinghan_from_sheet(ws)
 
-        # 雲象 (C21) + 當月 QYLD 年化 (D19)
+        # 雲象 (C21) + 當月 QYLD 年化 (D19) + F4 一菜雙石 + I2 特斯拉
         yx_qyld = extract_yunxiang_and_qyld(ws)
         qyld = yx_qyld.pop('_qyld_yield', None)
+        kid_wan = yx_qyld.pop('_monthly_kid_wan', None)
+        tesla_pmt = yx_qyld.pop('_tesla_pmt_wan', None)
 
         # 合併
         all_balances = {**my_balances, **kids_balances, **jh_balances, **yx_qyld}
@@ -340,9 +355,18 @@ def main():
         }
         if qyld is not None:
             snapshot['qyld_yield'] = round(qyld, 6)
+        if kid_wan is not None:
+            snapshot['monthly_kid_wan'] = round(kid_wan, 4)
+        if tesla_pmt is not None:
+            snapshot['tesla_pmt_wan'] = round(tesla_pmt, 4)
 
         snapshots.append(snapshot)
-        print(f"  ✓ {len(all_balances)} 個帳戶" + (f" + qyld={qyld:.4f}" if qyld else ""))
+        extras = []
+        if qyld: extras.append(f"qyld={qyld:.4f}")
+        if kid_wan: extras.append(f"kid={kid_wan:.2f}")
+        if tesla_pmt: extras.append(f"tesla={tesla_pmt:.4f}")
+        extra_str = (" + " + ", ".join(extras)) if extras else ""
+        print(f"  ✓ {len(all_balances)} 個帳戶{extra_str}")
 
     # 排序(時間升冪)
     snapshots.sort(key=lambda s: s['date'])

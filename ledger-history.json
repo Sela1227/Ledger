@@ -3,44 +3,7 @@
   "settings": {
     "retirement_target_wan": 8955,
     "qyld_yield": 0.0739,
-    "monthly_expense_wan": 21.81,
-    "salary_wan": 33.5676,
-    "monthly_card_wan": 25.0,
-    "retire_birthday": "2029-12-27",
-    "retire_extension_years": 0,
-    "extra_return_wan": 0,
-    "loan_pmt_wan": [
-      {
-        "name": "台新車貸",
-        "wan_per_month": 2.1429,
-        "due_day": 11
-      },
-      {
-        "name": "玉山房貸",
-        "wan_per_month": 3.4227,
-        "due_day": 28
-      },
-      {
-        "name": "玉山房貸",
-        "wan_per_month": 9.3294,
-        "due_day": 28
-      },
-      {
-        "name": "玉山信貸",
-        "wan_per_month": 1.961,
-        "due_day": 28
-      },
-      {
-        "name": "玉山信貸",
-        "wan_per_month": 6.4275,
-        "due_day": 23
-      },
-      {
-        "name": "玉山信貸",
-        "wan_per_month": 6.2393,
-        "due_day": 17
-      }
-    ]
+    "monthly_expense_wan": 21.81
   },
   "accounts": [
     {
@@ -182,7 +145,7 @@
       "id": "yunxiang",
       "name": "雲象",
       "category": "other",
-      "side": "reference",
+      "side": "asset",
       "liquid": false,
       "owner": "me",
       "active": true
@@ -194,7 +157,7 @@
       "side": "asset",
       "liquid": true,
       "owner": "me",
-      "active": false
+      "active": true
     },
     {
       "id": "yushan_loan",
@@ -206,10 +169,10 @@
       "active": true,
       "auto": {
         "type": "amortize",
-        "principal_wan": 3184.4023,
+        "principal_wan": 3141.5597,
         "rate": 0.021,
         "years_left": 28,
-        "last_balance_wan": -3184.4023
+        "last_balance_wan": -3141.5597
       }
     },
     {
@@ -219,12 +182,7 @@
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": true,
-      "auto": {
-        "type": "formula",
-        "expression": "-yunxiang/15",
-        "description": "欠饅頭 = -雲象 / 15(投資協議,饅頭出資 1/15)"
-      }
+      "active": true
     },
     {
       "id": "fubon_loan",
@@ -233,7 +191,7 @@
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": false
+      "active": true
     },
     {
       "id": "taishin_car_loan",
@@ -251,7 +209,7 @@
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": false
+      "active": true
     },
     {
       "id": "dora_stock",
@@ -323,7 +281,7 @@
       "side": "asset",
       "liquid": true,
       "owner": "jinghan",
-      "active": false
+      "active": true
     },
     {
       "id": "jh_cash",
@@ -1600,6 +1558,40 @@
         "yunxiang": 172.0354
       },
       "qyld_yield": 0.060059,
+      "monthly_kid_wan": 4.5,
+      "tesla_pmt_wan": 2.1429
+    },
+    {
+      "date": "2026-05-01",
+      "balances": {
+        "yushan_loan": -3141.5597,
+        "taishin_car_loan": -171.4284,
+        "mantou": -10.354,
+        "td_us": 4996.7418,
+        "sinopac_us": 2016.2751,
+        "crypto": 47.3884,
+        "tw_stock": 160.8648,
+        "sinopac_bank": 24.1079,
+        "yushan_bank": 2.5361,
+        "ctbc_bank": 1.1493,
+        "taishin_bank": 0.0819,
+        "primer": 100.0,
+        "mega_zar": 16.4869,
+        "labor_self": 10.8,
+        "labor_perf": 5.6498,
+        "house": 2600.0,
+        "land": 200.0,
+        "dora_stock": 1089.7997,
+        "dora_cash": 89.1382,
+        "leo_stock": 433.8602,
+        "leo_cash": 69.34,
+        "aaron_stock": 433.8602,
+        "aaron_cash": 69.34,
+        "jh_stock": 401.0879,
+        "jh_cash": 52.9534,
+        "yunxiang": 155.3097
+      },
+      "qyld_yield": 0.071216,
       "monthly_kid_wan": 4.5,
       "tesla_pmt_wan": 2.1429
     }

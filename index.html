@@ -6,9 +6,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0d0b">
-<link rel="manifest" href='data:application/manifest+json,{"name":"資產札記","short_name":"札記","start_url":"./","display":"standalone","background_color":"%230e0d0b","theme_color":"%230e0d0b","orientation":"portrait","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iIzBlMGQwYiIgcng9IjQ4Ii8+PHRleHQgeD0iMTI4IiB5PSIxNTUiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIxMTAiIGZpbGw9IiNkNGIwNzQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI3MDAiPuiznOiogjwvdGV4dD48L3N2Zz4=","sizes":"256x256","type":"image/svg+xml"}]}'>
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iIzBlMGQwYiIgcng9IjQ4Ii8+PHRleHQgeD0iMTI4IiB5PSIxNTUiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIxMTAiIGZpbGw9IiNkNGIwNzQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI3MDAiPuiznOiogjwvdGV4dD48L3N2Zz4=">
-<title>資產札記</title>
+
+<!-- SELA Favicon Set (對齊 SELA-Starter-Kit V1.8.0) -->
+<link rel="icon" type="image/svg+xml" href="favicon/sela.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+<link rel="manifest" href="favicon/site.webmanifest">
+
+<title>資產札記 Ledger</title>
 <style>
   /* ============ Typography: 易讀優先 ============ */
   /* Noto Sans TC = 中文清晰好讀;Inter = 英數比 system font 統一;
@@ -229,19 +235,55 @@
     border-radius: 10px; padding: 12px 14px; margin-bottom: 6px;
   }
   .loan-pmt-card .top {
-    display: flex; align-items: baseline; justify-content: space-between;
+    display: flex; align-items: center; gap: 6px;
     margin-bottom: 8px;
   }
-  .loan-pmt-card .nm {
-    font-family: var(--tc); font-size: 14px; font-weight: 600; color: var(--ink);
+  .loan-pmt-card .loan-name-input {
+    flex: 1; min-width: 0;
+    background: transparent; border: none;
+    font-family: var(--tc); font-size: 14px; font-weight: 600;
+    color: var(--ink);
+    padding: 4px 0;
+    -webkit-appearance: none;
   }
-  .loan-pmt-card .due {
+  .loan-pmt-card .loan-name-input:focus {
+    outline: none;
+    background: var(--bg);
+    border-bottom: 1px solid var(--gold-soft);
+  }
+  .loan-pmt-card .due-edit {
     font-family: var(--num); font-size: 11px; color: var(--ink-dim);
+    display: flex; align-items: center; gap: 2px;
+  }
+  .loan-pmt-card .due-edit input {
+    width: 32px; padding: 3px 4px;
+    background: var(--bg); border: 1px solid var(--line-soft);
+    color: var(--ink-mute); border-radius: 6px;
+    font-family: var(--num); font-size: 11px;
+    text-align: center;
+    -webkit-appearance: none;
+  }
+  .loan-pmt-card .due-edit input:focus {
+    outline: none; border-color: var(--gold);
+  }
+  .loan-pmt-card .loan-del-btn {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-dim);
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    font-size: 11px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .loan-pmt-card .loan-del-btn:active {
+    background: rgba(209,128,120,0.15);
+    color: var(--red);
+    border-color: var(--red);
   }
   .loan-pmt-card .bottom {
     display: flex; align-items: center; gap: 8px;
   }
-  .loan-pmt-card input {
+  .loan-pmt-card input[type="number"]:not(.due-edit input) {
     flex: 1; min-width: 0;
     background: var(--bg); border: 1px solid var(--line); color: var(--gold);
     padding: 10px 12px; border-radius: 8px;
@@ -249,10 +291,24 @@
     text-align: right;
     -webkit-appearance: none;
   }
-  .loan-pmt-card input:focus { outline: none; border-color: var(--gold); }
+  .loan-pmt-card .bottom input:focus { outline: none; border-color: var(--gold); }
   .loan-pmt-card .unit {
     font-family: var(--tc); font-size: 13px; color: var(--ink-mute);
     flex-shrink: 0;
+  }
+
+  .btn-add-loan {
+    width: 100%; padding: 12px;
+    background: transparent; border: 1px dashed var(--line);
+    color: var(--gold-soft); border-radius: 10px;
+    font-family: var(--tc); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+  .btn-add-loan:active {
+    background: var(--bg-elev);
+    border-color: var(--gold);
+    color: var(--gold);
   }
 
   /* ============ Top bar ============ */
@@ -268,6 +324,14 @@
   .topbar .brand .en {
     font-family: var(--en); font-size: 11px; color: var(--ink-dim);
     margin-left: 8px; letter-spacing: 0.15em; font-weight: 500; text-transform: uppercase;
+  }
+  .topbar .brand .ver {
+    font-family: var(--num); font-size: 10px; color: var(--gold-soft);
+    margin-left: 8px; letter-spacing: 0.05em; font-weight: 600;
+    background: rgba(212,176,116,0.08);
+    border: 1px solid rgba(212,176,116,0.2);
+    padding: 2px 6px; border-radius: 4px;
+    vertical-align: middle;
   }
   .topbar .menu-btn {
     background: transparent; border: 1px solid var(--line); color: var(--ink-mute);
@@ -751,7 +815,7 @@
 </div>
 
 <div class="topbar">
-  <div class="brand">資產札記<span class="en">Ledger</span></div>
+  <div class="brand">資產札記<span class="en">Ledger</span><span class="ver">v0.8.1</span></div>
   <button class="menu-btn" id="btn-help" title="說明">?</button>
 </div>
 
@@ -855,44 +919,7 @@ const DEFAULT_DATA = {
   "settings": {
     "retirement_target_wan": 8955,
     "qyld_yield": 0.0739,
-    "monthly_expense_wan": 21.81,
-    "salary_wan": 33.5676,
-    "monthly_card_wan": 25.0,
-    "retire_birthday": "2029-12-27",
-    "retire_extension_years": 0,
-    "extra_return_wan": 0,
-    "loan_pmt_wan": [
-      {
-        "name": "台新車貸",
-        "wan_per_month": 2.1429,
-        "due_day": 11
-      },
-      {
-        "name": "玉山房貸",
-        "wan_per_month": 3.4227,
-        "due_day": 28
-      },
-      {
-        "name": "玉山房貸",
-        "wan_per_month": 9.3294,
-        "due_day": 28
-      },
-      {
-        "name": "玉山信貸",
-        "wan_per_month": 1.961,
-        "due_day": 28
-      },
-      {
-        "name": "玉山信貸",
-        "wan_per_month": 6.4275,
-        "due_day": 23
-      },
-      {
-        "name": "玉山信貸",
-        "wan_per_month": 6.2393,
-        "due_day": 17
-      }
-    ]
+    "monthly_expense_wan": 21.81
   },
   "accounts": [
     {
@@ -1034,7 +1061,7 @@ const DEFAULT_DATA = {
       "id": "yunxiang",
       "name": "雲象",
       "category": "other",
-      "side": "reference",
+      "side": "asset",
       "liquid": false,
       "owner": "me",
       "active": true
@@ -1046,7 +1073,7 @@ const DEFAULT_DATA = {
       "side": "asset",
       "liquid": true,
       "owner": "me",
-      "active": false
+      "active": true
     },
     {
       "id": "yushan_loan",
@@ -1058,10 +1085,10 @@ const DEFAULT_DATA = {
       "active": true,
       "auto": {
         "type": "amortize",
-        "principal_wan": 3184.4023,
+        "principal_wan": 3141.5597,
         "rate": 0.021,
         "years_left": 28,
-        "last_balance_wan": -3184.4023
+        "last_balance_wan": -3141.5597
       }
     },
     {
@@ -1071,12 +1098,7 @@ const DEFAULT_DATA = {
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": true,
-      "auto": {
-        "type": "formula",
-        "expression": "-yunxiang/15",
-        "description": "欠饅頭 = -雲象 / 15(投資協議,饅頭出資 1/15)"
-      }
+      "active": true
     },
     {
       "id": "fubon_loan",
@@ -1085,7 +1107,7 @@ const DEFAULT_DATA = {
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": false
+      "active": true
     },
     {
       "id": "taishin_car_loan",
@@ -1103,7 +1125,7 @@ const DEFAULT_DATA = {
       "side": "liability",
       "liquid": true,
       "owner": "me",
-      "active": false
+      "active": true
     },
     {
       "id": "dora_stock",
@@ -1175,7 +1197,7 @@ const DEFAULT_DATA = {
       "side": "asset",
       "liquid": true,
       "owner": "jinghan",
-      "active": false
+      "active": true
     },
     {
       "id": "jh_cash",
@@ -1192,7 +1214,7 @@ const DEFAULT_DATA = {
 
 // 內嵌歷史資料(2019/11 ~ 2026/03 共 57 筆)
 // 啟動時不會自動載入,需在「設定」頁手動點「載入內嵌歷史」按鈕
-const EMBEDDED_HISTORY = {"snapshots":[{"date":"2019-11-01","balances":{"fubon_loan":-1848.0,"td_us":2479.0,"sinopac_us":774.0,"tw_stock":438.0,"cash_legacy":52.0,"house":2600.0,"land":200.0}},{"date":"2019-12-01","balances":{"fubon_loan":-1840.0,"td_us":2486.0,"sinopac_us":777.0,"tw_stock":395.0,"cash_legacy":22.0,"house":2600.0,"land":200.0}},{"date":"2020-01-01","balances":{"fubon_loan":-1832.0,"td_us":2493.0,"sinopac_us":783.0,"tw_stock":351.0,"cash_legacy":14.0,"house":2600.0,"land":200.0}},{"date":"2020-02-01","balances":{"fubon_loan":-1825.0,"td_us":2528.0,"sinopac_us":813.0,"tw_stock":285.0,"cash_legacy":64.0,"house":2600.0,"land":200.0}},{"date":"2020-03-01","balances":{"fubon_loan":-1816.0,"td_us":2379.0,"sinopac_us":770.0,"tw_stock":64.6,"cash_legacy":262.8,"house":2600.0,"land":200.0}},{"date":"2020-06-01","balances":{"fubon_loan":-1792.0,"td_us":2497.0,"sinopac_us":849.0,"tw_stock":14.0,"cash_legacy":130.0,"house":2600.0,"land":200.0}},{"date":"2020-07-01","balances":{"fubon_loan":-1785.0,"td_us":2534.0,"sinopac_us":863.0,"tw_stock":23.0,"cash_legacy":76.0,"house":2600.0,"land":200.0}},{"date":"2020-08-01","balances":{"fubon_loan":-1776.0,"td_us":2644.0,"sinopac_us":911.0,"tw_stock":15.3,"cash_legacy":21.9,"house":2600.0,"land":200.0}},{"date":"2020-09-01","balances":{"fubon_loan":-1767.0,"td_us":2719.0,"sinopac_us":954.0,"tw_stock":5.9,"cash_legacy":-13.0,"house":2600.0,"land":200.0}},{"date":"2020-10-01","balances":{"fubon_loan":-1760.0,"td_us":2619.0,"sinopac_us":943.0,"tw_stock":7.5,"cash_legacy":-36.0,"house":2600.0,"land":200.0}},{"date":"2020-11-01","balances":{"fubon_loan":-1752.0,"td_us":2686.0,"sinopac_us":953.0,"tw_stock":9.2,"cash_legacy":-40.0,"house":2600.0,"land":200.0}},{"date":"2020-12-01","balances":{"fubon_loan":-1743.0,"td_us":3302.0,"sinopac_us":1037.0,"cash_legacy":0.0,"house":2600.0,"land":200.0,"xt_loan":-70.0},"monthly_kid_wan":11.0},{"date":"2021-01-01","balances":{"fubon_loan":-1735.0,"td_us":3305.0,"sinopac_us":1101.0,"sinopac_bank":203.0,"yushan_bank":129.0,"ctbc_bank":26.0,"yushan_loan":-500.0,"house":2600.0,"land":200.0},"monthly_kid_wan":11.0},{"date":"2021-02-01","balances":{"fubon_loan":-1727.0,"td_us":3585.0,"sinopac_us":1126.0,"sinopac_bank":154.0,"yushan_bank":122.0,"ctbc_bank":42.0,"yushan_loan":-494.0,"house":2600.0,"land":200.0}},{"date":"2021-03-01","balances":{"fubon_loan":-1719.0,"td_us":3566.0,"sinopac_us":1192.0,"sinopac_bank":114.0,"yushan_bank":116.0,"ctbc_bank":36.8,"yushan_loan":-489.0,"house":2600.0,"land":200.0}},{"date":"2021-04-01","balances":{"fubon_loan":-1710.4,"td_us":3637.9,"sinopac_us":1224.7,"sinopac_bank":61.0,"yushan_bank":110.0,"ctbc_bank":43.0,"yushan_loan":-483.0,"house":2600.0,"land":200.0}},{"date":"2021-06-01","balances":{"fubon_loan":-1693.8,"yushan_loan":-472.0,"td_us":3529.0,"sinopac_us":1074.0,"sinopac_bank":33.4,"yushan_bank":97.5,"ctbc_bank":23.4,"house":2600.0,"land":200.0}},{"date":"2021-07-01","balances":{"fubon_loan":-1685.6,"yushan_loan":-466.4,"td_us":3799.4,"sinopac_us":1152.5,"sinopac_bank":31.48,"yushan_bank":90.99,"ctbc_bank":11.51,"house":2600.0,"land":200.0}},{"date":"2021-08-01","balances":{"fubon_loan":-1677.3,"yushan_loan":-460.79,"td_us":3663.95,"sinopac_us":1112.61,"sinopac_bank":151.7798,"yushan_bank":84.63,"ctbc_bank":1.54,"house":2600.0,"land":200.0}},{"date":"2021-09-01","balances":{"fubon_loan":-1669.0,"yushan_loan":-455.16,"td_us":3688.4,"sinopac_us":1106.56,"sinopac_bank":11.1579,"yushan_bank":78.28,"ctbc_bank":3.1,"house":2600.0,"land":200.0}},{"date":"2021-10-04","balances":{"fubon_loan":-1660.6768,"yushan_loan":-499.49,"td_us":3671.75,"sinopac_us":1095.9,"sinopac_bank":7.7684,"yushan_bank":95.67,"ctbc_bank":2.9588,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2021-11-01","balances":{"yushan_loan":-2493.205,"td_us":3932.28,"sinopac_us":1140.65,"tw_stock":39.624,"sinopac_bank":7.8311,"yushan_bank":379.59,"ctbc_bank":7.9218,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2021-12-01","balances":{"yushan_loan":-2480.4392,"td_us":3732.42,"sinopac_us":1107.39,"sinopac_bank":27.9944,"yushan_bank":357.9152,"ctbc_bank":15.8568,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-01-01","balances":{"yushan_loan":-2467.6838,"td_us":3762.33,"sinopac_us":1138.77,"sinopac_bank":78.0594,"yushan_bank":250.3504,"ctbc_bank":3.22,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-04-01","balances":{"yushan_loan":-2429.2852,"td_us":3792.3182,"sinopac_us":1119.1911,"crypto":33.9686,"tw_stock":27.478,"sinopac_bank":35.5643,"yushan_bank":174.2387,"ctbc_bank":5.0,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-05-01","balances":{"yushan_loan":-2416.4543,"td_us":3335.5534,"sinopac_us":995.5747,"crypto":34.0629,"tw_stock":64.0,"sinopac_bank":49.0576,"yushan_bank":111.0711,"ctbc_bank":3.0,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-06-01","balances":{"yushan_loan":-2403.6107,"td_us":3223.0,"sinopac_us":955.0,"crypto":41.5317,"tw_stock":27.9758,"sinopac_bank":73.0143,"yushan_bank":80.88,"ctbc_bank":4.23,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-08-01","balances":{"yushan_loan":-2378.3233,"td_us":3321.4,"sinopac_us":1009.89,"crypto":22.6271,"tw_stock":38.101,"sinopac_bank":26.76,"yushan_bank":18.499,"ctbc_bank":3.6,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-09-01","balances":{"yushan_loan":-2365.6634,"td_us":3234.6158,"sinopac_us":971.8937,"crypto":21.0551,"tw_stock":17.164,"sinopac_bank":14.2694,"yushan_bank":12.0999,"ctbc_bank":9.7447,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-10-01","balances":{"yushan_loan":-2353.109,"td_us":3033.0858,"sinopac_us":914.0076,"crypto":20.7391,"tw_stock":11.6284,"sinopac_bank":20.9211,"yushan_bank":24.3024,"ctbc_bank":1.685,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2024-01-01","balances":{"yushan_loan":-2269.9377,"td_us":3646.1855,"sinopac_us":975.9923,"crypto":30.7167,"sinopac_bank":4.1079,"yushan_bank":3.7198,"ctbc_bank":1.6966,"taishin_bank":1.6687,"oway_bank":3.0006,"primer":100.0,"house":2600.0,"land":200.0,"dora_stock":390.2304,"dora_cash":4.5976,"leo_stock":164.2691,"leo_cash":0.0332,"aaron_stock":164.2691,"aaron_cash":0.0332},"monthly_kid_wan":1.5},{"date":"2024-02-01","balances":{"yushan_loan":-2256.2351,"td_us":3708.6416,"sinopac_us":999.5334,"crypto":30.5728,"sinopac_bank":7.9375,"yushan_bank":11.8364,"ctbc_bank":0.0221,"taishin_bank":0.144,"oway_bank":2.2027,"primer":100.0,"house":2600.0,"land":200.0,"dora_stock":390.5004,"dora_cash":4.1708,"leo_stock":164.0765,"leo_cash":0.0332,"aaron_stock":164.0765,"aaron_cash":0.0332},"monthly_kid_wan":1.5},{"date":"2024-03-01","balances":{"yushan_loan":-2242.2074,"mantou":-10.0,"td_us":3798.4686,"sinopac_us":1023.0625,"crypto":42.7853,"sinopac_bank":10.7156,"yushan_bank":2.8341,"ctbc_bank":0.8641,"taishin_bank":0.256,"oway_bank":0.0028,"primer":100.0,"house":2600.0,"land":200.0,"dora_stock":422.2526,"dora_cash":13.3108,"leo_stock":177.9684,"leo_cash":8.6334,"aaron_stock":177.9684,"aaron_cash":8.6334},"monthly_kid_wan":1.5},{"date":"2024-04-01","balances":{"yushan_loan":-3115.9684,"mantou":-10.0,"td_us":3913.061,"sinopac_us":1724.9676,"crypto":53.5357,"sinopac_bank":152.0,"yushan_bank":50.0,"ctbc_bank":1.6892,"taishin_bank":5.0,"oway_bank":2.0011,"primer":100.0,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":467.9306,"dora_cash":9.036,"leo_stock":195.9106,"leo_cash":8.1605,"aaron_stock":195.9106,"aaron_cash":8.1605},"qyld_yield":0.063861,"monthly_kid_wan":3.0},{"date":"2024-05-01","balances":{"yushan_loan":-3100.5061,"mantou":-10.0,"td_us":3763.6784,"sinopac_us":1707.3095,"crypto":46.1038,"sinopac_bank":177.1159,"yushan_bank":16.4652,"ctbc_bank":1.004,"taishin_bank":1.9985,"oway_bank":3.1643,"primer":100.0,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":470.6028,"dora_cash":7.9699,"leo_stock":197.1914,"leo_cash":7.8883,"aaron_stock":197.1914,"aaron_cash":7.8883},"qyld_yield":0.058472,"monthly_kid_wan":3.0},{"date":"2024-06-01","balances":{"yushan_loan":-3085.0443,"mantou":-10.0,"td_us":3929.0907,"sinopac_us":1753.8113,"crypto":55.211,"sinopac_bank":23.8813,"yushan_bank":9.919,"ctbc_bank":1.0225,"taishin_bank":1.9985,"oway_bank":1.57,"primer":100.0,"yunxiang":150.0,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":493.5315,"dora_cash":6.8879,"leo_stock":207.1109,"leo_cash":7.609,"aaron_stock":207.1109,"aaron_cash":7.609},"qyld_yield":0.064739,"monthly_kid_wan":3.0},{"date":"2024-07-01","balances":{"yushan_loan":-3069.6566,"mantou":-10.0,"td_us":3984.9366,"sinopac_us":1795.4595,"crypto":52.6365,"sinopac_bank":15.3936,"yushan_bank":10.5876,"ctbc_bank":3.3716,"taishin_bank":1.9881,"oway_bank":1.0,"primer":100.0,"yunxiang":150.0,"mega_zar":14.1614,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":555.658,"dora_cash":6.6828,"leo_stock":233.8322,"leo_cash":7.1295,"aaron_stock":233.8322,"aaron_cash":7.1295,"jh_stock":42.1573,"jh_loan":131.565,"jh_cash":8.6511},"qyld_yield":0.062137,"monthly_kid_wan":3.0},{"date":"2024-08-01","balances":{"yushan_loan":-3054.2388,"mantou":-10.0,"td_us":4111.6265,"sinopac_us":1852.7583,"crypto":51.9088,"sinopac_bank":10.7407,"yushan_bank":12.8744,"ctbc_bank":2.5776,"taishin_bank":0.2102,"oway_bank":1.005,"primer":100.0,"yunxiang":150.0,"mega_zar":14.1614,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":548.9966,"dora_cash":5.6023,"leo_stock":231.6167,"leo_cash":6.4513,"aaron_stock":231.6167,"aaron_cash":6.4513,"jh_stock":172.6689,"jh_cash":7.4998},"qyld_yield":0.060174,"monthly_kid_wan":3.0},{"date":"2024-09-01","balances":{"yushan_loan":-3038.7917,"mantou":-10.0,"td_us":4172.0,"sinopac_us":1847.38,"crypto":43.3793,"sinopac_bank":9.7319,"yushan_bank":12.0307,"ctbc_bank":2.2836,"taishin_bank":0.2102,"oway_bank":3.3035,"primer":100.0,"yunxiang":150.0,"mega_zar":14.5559,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":544.1134,"dora_cash":15.8455,"leo_stock":230.6865,"leo_cash":10.2766,"aaron_stock":230.6865,"aaron_cash":10.2766,"jh_stock":172.421,"jh_cash":7.9546},"qyld_yield":0.064854,"monthly_kid_wan":3.0},{"date":"2024-10-01","balances":{"yushan_loan":-3023.3151,"mantou":-10.0,"td_us":4207.6092,"sinopac_us":1858.4578,"crypto":45.6746,"sinopac_bank":6.71,"yushan_bank":5.2869,"ctbc_bank":0.9988,"taishin_bank":0.2102,"oway_bank":1.3342,"primer":100.0,"yunxiang":150.0,"mega_zar":14.617,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":554.6605,"dora_cash":12.9735,"leo_stock":235.4364,"leo_cash":9.0162,"aaron_stock":235.4364,"aaron_cash":9.0162,"jh_stock":175.0374,"jh_cash":7.3612},"qyld_yield":0.066816,"monthly_kid_wan":3.0},{"date":"2024-11-01","balances":{"yushan_loan":-3007.8089,"mantou":-10.0,"td_us":4049.9424,"sinopac_us":1889.2964,"crypto":45.7189,"sinopac_bank":12.882,"yushan_bank":4.4704,"ctbc_bank":0.3118,"taishin_bank":0.2102,"oway_bank":0.4684,"primer":100.0,"yunxiang":150.0,"mega_zar":15.0953,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":578.2076,"dora_cash":10.2074,"leo_stock":247.0201,"leo_cash":7.1466,"aaron_stock":247.0201,"aaron_cash":7.1466,"jh_stock":181.3924,"jh_cash":6.4746},"qyld_yield":0.060417,"monthly_kid_wan":3.0},{"date":"2024-12-01","balances":{"yushan_loan":-2992.2731,"mantou":-10.0,"td_us":4317.4642,"sinopac_us":1973.5074,"crypto":62.1352,"sinopac_bank":5.9013,"yushan_bank":0.0788,"ctbc_bank":0.3118,"taishin_bank":0.0807,"oway_bank":1.0,"primer":100.0,"yunxiang":150.0,"mega_zar":14.9185,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":570.3751,"dora_cash":7.4361,"leo_stock":244.8769,"leo_cash":5.2718,"aaron_stock":244.8769,"aaron_cash":5.2718,"jh_stock":179.251,"jh_cash":5.5988},"qyld_yield":0.062565,"monthly_kid_wan":3.0},{"date":"2025-01-01","balances":{"yushan_loan":-2976.7075,"mantou":-12.4115,"td_us":4236.8771,"sinopac_us":1960.9307,"crypto":60.5535,"sinopac_bank":5.6498,"yushan_bank":0.9291,"ctbc_bank":5.5003,"taishin_bank":0.0819,"oway_bank":0.541,"primer":100.0,"yunxiang":186.1726,"mega_zar":14.8199,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":595.8481,"dora_cash":5.6186,"leo_stock":256.5255,"leo_cash":4.0353,"aaron_stock":256.5255,"aaron_cash":4.0353,"jh_stock":186.2498,"jh_cash":5.0098},"qyld_yield":0.058844,"monthly_kid_wan":3.0},{"date":"2025-02-01","balances":{"yushan_loan":-2970.7297,"mantou":-13.042,"td_us":4360.296,"sinopac_us":2010.3545,"crypto":60.6508,"sinopac_bank":5.0,"yushan_bank":21.4731,"ctbc_bank":0.3003,"taishin_bank":0.0819,"oway_bank":0.819,"primer":100.0,"yunxiang":195.6305,"mega_zar":14.4677,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":613.0776,"dora_cash":6.0535,"leo_stock":264.9321,"leo_cash":3.0879,"aaron_stock":264.9321,"aaron_cash":3.0879,"jh_stock":190.7294,"jh_cash":5.0129},"qyld_yield":0.07209,"monthly_kid_wan":3.0},{"date":"2025-03-01","balances":{"yushan_loan":-2955.1242,"mantou":-13.9712,"td_us":4341.2507,"sinopac_us":2001.3871,"crypto":47.0983,"sinopac_bank":9.5014,"yushan_bank":19.5525,"ctbc_bank":6.1803,"taishin_bank":0.0819,"oway_bank":1.95,"primer":100.0,"yunxiang":209.5686,"mega_zar":14.7805,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":595.7235,"dora_cash":11.6192,"leo_stock":259.4999,"leo_cash":5.8853,"aaron_stock":259.4999,"aaron_cash":5.8853,"jh_stock":186.7751,"jh_cash":8.681},"qyld_yield":0.084952,"monthly_kid_wan":3.0},{"date":"2025-04-01","balances":{"yushan_loan":-2929.8315,"mantou":-12.4792,"td_us":4188.1717,"sinopac_us":1923.904,"crypto":44.9534,"sinopac_bank":4.5,"yushan_bank":0.47,"ctbc_bank":1.0,"taishin_bank":0.0819,"oway_bank":0.18,"primer":100.0,"yunxiang":187.1881,"mega_zar":14.8425,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":551.9284,"dora_cash":9.7425,"leo_stock":240.8646,"leo_cash":4.6005,"aaron_stock":240.8646,"aaron_cash":4.6005,"jh_stock":174.1957,"jh_cash":8.0452},"qyld_yield":0.082191,"monthly_kid_wan":3.0},{"date":"2025-05-01","balances":{"yushan_loan":-3396.1463,"mantou":-11.2666,"td_us":4087.9606,"sinopac_us":1963.2524,"crypto":43.6268,"tw_stock":45.2296,"sinopac_bank":230.1273,"yushan_bank":85.8552,"ctbc_bank":5.3803,"taishin_bank":0.0819,"oway_bank":1.3203,"primer":100.0,"yunxiang":168.999,"mega_zar":15.1615,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":531.2712,"dora_cash":10.599,"leo_stock":232.369,"leo_cash":6.8183,"aaron_stock":232.369,"aaron_cash":6.8183,"jh_stock":174.1957,"jh_cash":8.0452},"qyld_yield":0.074971,"monthly_kid_wan":3.0},{"date":"2025-06-01","balances":{"yushan_loan":-3375.1557,"mantou":-10.7522,"td_us":4141.7519,"sinopac_us":1981.8259,"crypto":48.2603,"tw_stock":61.3338,"sinopac_bank":71.0124,"yushan_bank":81.7328,"ctbc_bank":2.4087,"taishin_bank":0.0819,"oway_bank":6.5946,"primer":100.0,"yunxiang":161.2832,"mega_zar":14.5353,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":562.0761,"dora_cash":8.3456,"leo_stock":246.8033,"leo_cash":5.4503,"aaron_stock":246.8033,"aaron_cash":5.4503,"jh_stock":175.1656,"jh_cash":6.3015},"qyld_yield":0.086321,"monthly_kid_wan":3.0},{"date":"2025-07-01","balances":{"yushan_loan":-3354.1245,"mantou":-10.4436,"td_us":4253.4976,"sinopac_us":1997.4237,"crypto":47.2542,"tw_stock":228.3669,"sinopac_bank":45.1592,"yushan_bank":81.0634,"ctbc_bank":1.1173,"taishin_bank":0.0819,"oway_bank":12.25,"primer":100.0,"mega_zar":14.1541,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":604.1151,"dora_cash":6.4708,"leo_stock":264.9033,"leo_cash":4.6587,"aaron_stock":264.9033,"aaron_cash":4.6587,"jh_stock":187.4071,"jh_cash":5.6778,"yunxiang":156.6538},"qyld_yield":0.079769,"monthly_kid_wan":3.0},{"date":"2025-08-01","balances":{"yushan_loan":-3333.0525,"mantou":-10.2378,"td_us":4447.094,"sinopac_us":2063.9668,"crypto":61.7523,"tw_stock":220.0727,"sinopac_bank":19.2175,"yushan_bank":48.4042,"ctbc_bank":0.9608,"taishin_bank":0.0819,"oway_bank":1.116,"primer":100.0,"mega_zar":13.8627,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":645.6843,"dora_cash":4.2133,"leo_stock":283.982,"leo_cash":3.3257,"aaron_stock":283.982,"aaron_cash":3.3257,"jh_stock":198.3465,"jh_cash":104.8239,"yunxiang":153.5675},"qyld_yield":0.076391,"monthly_kid_wan":3.0},{"date":"2025-09-01","balances":{"yushan_loan":-3311.9398,"mantou":-11.0343,"td_us":4599.7528,"sinopac_us":2126.3564,"crypto":72.6841,"tw_stock":232.9086,"sinopac_bank":13.3547,"yushan_bank":41.2869,"ctbc_bank":0.3249,"taishin_bank":0.0819,"oway_bank":1.1666,"primer":100.0,"mega_zar":14.1829,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":659.776,"dora_cash":6.0536,"leo_stock":290.8395,"leo_cash":3.6798,"aaron_stock":290.8395,"aaron_cash":3.6798,"jh_stock":231.2439,"jh_cash":77.3588,"yunxiang":165.5144},"qyld_yield":0.073971,"monthly_kid_wan":3.0},{"date":"2025-10-01","balances":{"yushan_loan":-3290.7862,"mantou":-11.7146,"td_us":4775.3375,"sinopac_us":2178.9003,"crypto":75.7117,"tw_stock":243.8922,"sinopac_bank":23.2065,"yushan_bank":18.1573,"ctbc_bank":0.8361,"taishin_bank":0.0819,"oway_bank":1.16,"primer":100.0,"mega_zar":14.7614,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":725.7162,"dora_cash":4.0413,"leo_stock":320.1159,"leo_cash":2.3412,"aaron_stock":320.1159,"aaron_cash":2.3412,"jh_stock":244.6883,"jh_cash":98.5552,"yunxiang":175.719},"qyld_yield":0.07953,"monthly_kid_wan":3.0},{"date":"2025-11-01","balances":{"yushan_loan":-3269.5916,"mantou":-10.7356,"td_us":4879.8697,"sinopac_us":2191.2673,"crypto":75.1544,"tw_stock":179.5219,"sinopac_bank":52.3867,"yushan_bank":12.7269,"ctbc_bank":3.3333,"taishin_bank":0.0819,"oway_bank":4.6133,"primer":100.0,"mega_zar":15.1664,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":799.4699,"dora_cash":8.5036,"leo_stock":346.6565,"leo_cash":7.7361,"aaron_stock":346.6565,"aaron_cash":7.7361,"jh_stock":310.1359,"jh_cash":45.146,"yunxiang":161.0344},"qyld_yield":0.088709,"monthly_kid_wan":5.0,"tesla_pmt_wan":2.4},{"date":"2025-12-01","balances":{"yushan_loan":-3248.3561,"mantou":-12.5111,"td_us":4926.2654,"sinopac_us":2229.6727,"crypto":60.5087,"tw_stock":191.059,"sinopac_bank":1.578,"yushan_bank":18.3498,"ctbc_bank":0.278,"taishin_bank":0.0819,"oway_bank":4.15,"primer":100.0,"mega_zar":15.3988,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":764.7397,"dora_cash":7.2654,"leo_stock":332.4167,"leo_cash":6.3618,"aaron_stock":332.4167,"aaron_cash":6.3618,"jh_stock":302.79,"jh_cash":38.598,"yunxiang":187.6659},"qyld_yield":0.068625,"monthly_kid_wan":5.0},{"date":"2026-01-01","balances":{"yushan_loan":-3227.0794,"taishin_car_loan":-180.0,"mantou":-12.0299,"td_us":4827.7708,"sinopac_us":2210.1713,"crypto":61.77,"tw_stock":185.725,"sinopac_bank":33.7784,"yushan_bank":6.0,"ctbc_bank":1.4338,"taishin_bank":0.0819,"oway_bank":3.8,"primer":100.0,"mega_zar":15.8101,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":827.2766,"dora_cash":5.675,"leo_stock":358.9458,"leo_cash":5.2511,"aaron_stock":358.9458,"aaron_cash":5.2511,"jh_stock":327.0096,"jh_cash":32.8759,"yunxiang":180.4481},"qyld_yield":0.060059,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1},{"date":"2026-02-01","balances":{"yushan_loan":-3205.7614,"taishin_car_loan":-177.85,"mantou":-11.6316,"td_us":4830.9712,"sinopac_us":2164.475,"crypto":52.7872,"tw_stock":181.7177,"sinopac_bank":25.925,"yushan_bank":15.0,"ctbc_bank":1.4338,"taishin_bank":0.0819,"oway_bank":2.0,"primer":100.0,"mega_zar":16.4852,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":889.8991,"dora_cash":4.8118,"leo_stock":383.8352,"leo_cash":3.9068,"aaron_stock":383.8352,"aaron_cash":3.9068,"jh_stock":346.6092,"jh_cash":26.5175,"yunxiang":174.4746},"qyld_yield":0.060059,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1},{"date":"2026-03-01","balances":{"yushan_loan":-3184.4023,"taishin_car_loan":-175.7142,"mantou":-11.469,"td_us":4734.2083,"sinopac_us":2105.7145,"crypto":42.326,"tw_stock":181.7182,"sinopac_bank":5.7569,"yushan_bank":17.6202,"ctbc_bank":0.6953,"taishin_bank":0.0819,"oway_bank":2.003,"primer":100.0,"mega_zar":17.3373,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":987.8605,"dora_cash":18.8328,"leo_stock":424.6723,"leo_cash":12.1002,"aaron_stock":424.6723,"aaron_cash":12.1002,"jh_stock":402.7335,"jh_cash":11.0062,"yunxiang":172.0354},"qyld_yield":0.060059,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1429}],"accounts":[{"id":"td_us","name":"TD 美股","category":"stock","side":"asset","liquid":true,"owner":"me","active":true},{"id":"sinopac_us","name":"永豐美股","category":"stock","side":"asset","liquid":true,"owner":"me","active":true},{"id":"crypto","name":"虛擬幣","category":"crypto","side":"asset","liquid":true,"owner":"me","active":true},{"id":"tw_stock","name":"台股","category":"stock","side":"asset","liquid":true,"owner":"me","active":true},{"id":"sinopac_bank","name":"永豐銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"yushan_bank","name":"玉山銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"ctbc_bank","name":"中信銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"taishin_bank","name":"台新銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"oway_bank","name":"王道銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"primer","name":"普瑞默","category":"other","side":"asset","liquid":false,"owner":"me","active":true},{"id":"mega_zar","name":"兆豐南非幣","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"labor_self","name":"勞退自提","category":"pension","side":"asset","liquid":false,"owner":"me","active":true},{"id":"labor_perf","name":"勞退績效","category":"pension","side":"asset","liquid":false,"owner":"me","active":true},{"id":"house","name":"房子","category":"real_estate","side":"asset","liquid":false,"owner":"me","active":true},{"id":"land","name":"土地","category":"real_estate","side":"asset","liquid":false,"owner":"me","active":true},{"id":"yunxiang","name":"雲象","category":"other","side":"reference","liquid":false,"owner":"me","active":true},{"id":"cash_legacy","name":"現金(舊)","category":"cash","side":"asset","liquid":true,"owner":"me","active":false},{"id":"yushan_loan","name":"玉山貸款","category":"loan","side":"liability","liquid":true,"owner":"me","active":true,"auto":{"type":"amortize","principal_wan":3184.4023,"rate":0.021,"years_left":28,"last_balance_wan":-3184.4023}},{"id":"mantou","name":"欠饅頭","category":"loan","side":"liability","liquid":true,"owner":"me","active":true,"auto":{"type":"formula","expression":"-yunxiang/15","description":"欠饅頭 = -雲象 / 15(投資協議,饅頭出資 1/15)"}},{"id":"fubon_loan","name":"富邦房貸","category":"loan","side":"liability","liquid":true,"owner":"me","active":false},{"id":"taishin_car_loan","name":"台新車貸","category":"loan","side":"liability","liquid":true,"owner":"me","active":true},{"id":"xt_loan","name":"小彤借款","category":"loan","side":"liability","liquid":true,"owner":"me","active":false},{"id":"dora_stock","name":"Dora 股票","category":"stock","side":"asset","liquid":true,"owner":"dora","active":true},{"id":"dora_cash","name":"Dora 現金","category":"cash","side":"asset","liquid":true,"owner":"dora","active":true},{"id":"leo_stock","name":"Leo 股票","category":"stock","side":"asset","liquid":true,"owner":"leo","active":true},{"id":"leo_cash","name":"Leo 現金","category":"cash","side":"asset","liquid":true,"owner":"leo","active":true},{"id":"aaron_stock","name":"Aaron 股票","category":"stock","side":"asset","liquid":true,"owner":"aaron","active":true},{"id":"aaron_cash","name":"Aaron 現金","category":"cash","side":"asset","liquid":true,"owner":"aaron","active":true},{"id":"jh_stock","name":"景翰 股票","category":"stock","side":"asset","liquid":true,"owner":"jinghan","active":true},{"id":"jh_loan","name":"景翰 借券","category":"other","side":"asset","liquid":true,"owner":"jinghan","active":false},{"id":"jh_cash","name":"景翰 現金","category":"cash","side":"asset","liquid":true,"owner":"jinghan","active":true}]};
+const EMBEDDED_HISTORY = {"snapshots":[{"date":"2019-11-01","balances":{"fubon_loan":-1848.0,"td_us":2479.0,"sinopac_us":774.0,"tw_stock":438.0,"cash_legacy":52.0,"house":2600.0,"land":200.0}},{"date":"2019-12-01","balances":{"fubon_loan":-1840.0,"td_us":2486.0,"sinopac_us":777.0,"tw_stock":395.0,"cash_legacy":22.0,"house":2600.0,"land":200.0}},{"date":"2020-01-01","balances":{"fubon_loan":-1832.0,"td_us":2493.0,"sinopac_us":783.0,"tw_stock":351.0,"cash_legacy":14.0,"house":2600.0,"land":200.0}},{"date":"2020-02-01","balances":{"fubon_loan":-1825.0,"td_us":2528.0,"sinopac_us":813.0,"tw_stock":285.0,"cash_legacy":64.0,"house":2600.0,"land":200.0}},{"date":"2020-03-01","balances":{"fubon_loan":-1816.0,"td_us":2379.0,"sinopac_us":770.0,"tw_stock":64.6,"cash_legacy":262.8,"house":2600.0,"land":200.0}},{"date":"2020-06-01","balances":{"fubon_loan":-1792.0,"td_us":2497.0,"sinopac_us":849.0,"tw_stock":14.0,"cash_legacy":130.0,"house":2600.0,"land":200.0}},{"date":"2020-07-01","balances":{"fubon_loan":-1785.0,"td_us":2534.0,"sinopac_us":863.0,"tw_stock":23.0,"cash_legacy":76.0,"house":2600.0,"land":200.0}},{"date":"2020-08-01","balances":{"fubon_loan":-1776.0,"td_us":2644.0,"sinopac_us":911.0,"tw_stock":15.3,"cash_legacy":21.9,"house":2600.0,"land":200.0}},{"date":"2020-09-01","balances":{"fubon_loan":-1767.0,"td_us":2719.0,"sinopac_us":954.0,"tw_stock":5.9,"cash_legacy":-13.0,"house":2600.0,"land":200.0}},{"date":"2020-10-01","balances":{"fubon_loan":-1760.0,"td_us":2619.0,"sinopac_us":943.0,"tw_stock":7.5,"cash_legacy":-36.0,"house":2600.0,"land":200.0}},{"date":"2020-11-01","balances":{"fubon_loan":-1752.0,"td_us":2686.0,"sinopac_us":953.0,"tw_stock":9.2,"cash_legacy":-40.0,"house":2600.0,"land":200.0}},{"date":"2020-12-01","balances":{"fubon_loan":-1743.0,"td_us":3302.0,"sinopac_us":1037.0,"cash_legacy":0.0,"house":2600.0,"land":200.0,"xt_loan":-70.0},"monthly_kid_wan":11.0},{"date":"2021-01-01","balances":{"fubon_loan":-1735.0,"td_us":3305.0,"sinopac_us":1101.0,"sinopac_bank":203.0,"yushan_bank":129.0,"ctbc_bank":26.0,"yushan_loan":-500.0,"house":2600.0,"land":200.0},"monthly_kid_wan":11.0},{"date":"2021-02-01","balances":{"fubon_loan":-1727.0,"td_us":3585.0,"sinopac_us":1126.0,"sinopac_bank":154.0,"yushan_bank":122.0,"ctbc_bank":42.0,"yushan_loan":-494.0,"house":2600.0,"land":200.0}},{"date":"2021-03-01","balances":{"fubon_loan":-1719.0,"td_us":3566.0,"sinopac_us":1192.0,"sinopac_bank":114.0,"yushan_bank":116.0,"ctbc_bank":36.8,"yushan_loan":-489.0,"house":2600.0,"land":200.0}},{"date":"2021-04-01","balances":{"fubon_loan":-1710.4,"td_us":3637.9,"sinopac_us":1224.7,"sinopac_bank":61.0,"yushan_bank":110.0,"ctbc_bank":43.0,"yushan_loan":-483.0,"house":2600.0,"land":200.0}},{"date":"2021-06-01","balances":{"fubon_loan":-1693.8,"yushan_loan":-472.0,"td_us":3529.0,"sinopac_us":1074.0,"sinopac_bank":33.4,"yushan_bank":97.5,"ctbc_bank":23.4,"house":2600.0,"land":200.0}},{"date":"2021-07-01","balances":{"fubon_loan":-1685.6,"yushan_loan":-466.4,"td_us":3799.4,"sinopac_us":1152.5,"sinopac_bank":31.48,"yushan_bank":90.99,"ctbc_bank":11.51,"house":2600.0,"land":200.0}},{"date":"2021-08-01","balances":{"fubon_loan":-1677.3,"yushan_loan":-460.79,"td_us":3663.95,"sinopac_us":1112.61,"sinopac_bank":151.7798,"yushan_bank":84.63,"ctbc_bank":1.54,"house":2600.0,"land":200.0}},{"date":"2021-09-01","balances":{"fubon_loan":-1669.0,"yushan_loan":-455.16,"td_us":3688.4,"sinopac_us":1106.56,"sinopac_bank":11.1579,"yushan_bank":78.28,"ctbc_bank":3.1,"house":2600.0,"land":200.0}},{"date":"2021-10-04","balances":{"fubon_loan":-1660.6768,"yushan_loan":-499.49,"td_us":3671.75,"sinopac_us":1095.9,"sinopac_bank":7.7684,"yushan_bank":95.67,"ctbc_bank":2.9588,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2021-11-01","balances":{"yushan_loan":-2493.205,"td_us":3932.28,"sinopac_us":1140.65,"tw_stock":39.624,"sinopac_bank":7.8311,"yushan_bank":379.59,"ctbc_bank":7.9218,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2021-12-01","balances":{"yushan_loan":-2480.4392,"td_us":3732.42,"sinopac_us":1107.39,"sinopac_bank":27.9944,"yushan_bank":357.9152,"ctbc_bank":15.8568,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-01-01","balances":{"yushan_loan":-2467.6838,"td_us":3762.33,"sinopac_us":1138.77,"sinopac_bank":78.0594,"yushan_bank":250.3504,"ctbc_bank":3.22,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-04-01","balances":{"yushan_loan":-2429.2852,"td_us":3792.3182,"sinopac_us":1119.1911,"crypto":33.9686,"tw_stock":27.478,"sinopac_bank":35.5643,"yushan_bank":174.2387,"ctbc_bank":5.0,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-05-01","balances":{"yushan_loan":-2416.4543,"td_us":3335.5534,"sinopac_us":995.5747,"crypto":34.0629,"tw_stock":64.0,"sinopac_bank":49.0576,"yushan_bank":111.0711,"ctbc_bank":3.0,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-06-01","balances":{"yushan_loan":-2403.6107,"td_us":3223.0,"sinopac_us":955.0,"crypto":41.5317,"tw_stock":27.9758,"sinopac_bank":73.0143,"yushan_bank":80.88,"ctbc_bank":4.23,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-08-01","balances":{"yushan_loan":-2378.3233,"td_us":3321.4,"sinopac_us":1009.89,"crypto":22.6271,"tw_stock":38.101,"sinopac_bank":26.76,"yushan_bank":18.499,"ctbc_bank":3.6,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-09-01","balances":{"yushan_loan":-2365.6634,"td_us":3234.6158,"sinopac_us":971.8937,"crypto":21.0551,"tw_stock":17.164,"sinopac_bank":14.2694,"yushan_bank":12.0999,"ctbc_bank":9.7447,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2022-10-01","balances":{"yushan_loan":-2353.109,"td_us":3033.0858,"sinopac_us":914.0076,"crypto":20.7391,"tw_stock":11.6284,"sinopac_bank":20.9211,"yushan_bank":24.3024,"ctbc_bank":1.685,"primer":100.0,"house":2600.0,"land":200.0},"monthly_kid_wan":8.7109},{"date":"2024-01-01","balances":{"yushan_loan":-2269.9377,"td_us":3646.1855,"sinopac_us":975.9923,"crypto":30.7167,"sinopac_bank":4.1079,"yushan_bank":3.7198,"ctbc_bank":1.6966,"taishin_bank":1.6687,"oway_bank":3.0006,"primer":100.0,"house":2600.0,"land":200.0,"dora_stock":390.2304,"dora_cash":4.5976,"leo_stock":164.2691,"leo_cash":0.0332,"aaron_stock":164.2691,"aaron_cash":0.0332},"monthly_kid_wan":1.5},{"date":"2024-02-01","balances":{"yushan_loan":-2256.2351,"td_us":3708.6416,"sinopac_us":999.5334,"crypto":30.5728,"sinopac_bank":7.9375,"yushan_bank":11.8364,"ctbc_bank":0.0221,"taishin_bank":0.144,"oway_bank":2.2027,"primer":100.0,"house":2600.0,"land":200.0,"dora_stock":390.5004,"dora_cash":4.1708,"leo_stock":164.0765,"leo_cash":0.0332,"aaron_stock":164.0765,"aaron_cash":0.0332},"monthly_kid_wan":1.5},{"date":"2024-03-01","balances":{"yushan_loan":-2242.2074,"mantou":-10.0,"td_us":3798.4686,"sinopac_us":1023.0625,"crypto":42.7853,"sinopac_bank":10.7156,"yushan_bank":2.8341,"ctbc_bank":0.8641,"taishin_bank":0.256,"oway_bank":0.0028,"primer":100.0,"house":2600.0,"land":200.0,"dora_stock":422.2526,"dora_cash":13.3108,"leo_stock":177.9684,"leo_cash":8.6334,"aaron_stock":177.9684,"aaron_cash":8.6334},"monthly_kid_wan":1.5},{"date":"2024-04-01","balances":{"yushan_loan":-3115.9684,"mantou":-10.0,"td_us":3913.061,"sinopac_us":1724.9676,"crypto":53.5357,"sinopac_bank":152.0,"yushan_bank":50.0,"ctbc_bank":1.6892,"taishin_bank":5.0,"oway_bank":2.0011,"primer":100.0,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":467.9306,"dora_cash":9.036,"leo_stock":195.9106,"leo_cash":8.1605,"aaron_stock":195.9106,"aaron_cash":8.1605},"qyld_yield":0.063861,"monthly_kid_wan":3.0},{"date":"2024-05-01","balances":{"yushan_loan":-3100.5061,"mantou":-10.0,"td_us":3763.6784,"sinopac_us":1707.3095,"crypto":46.1038,"sinopac_bank":177.1159,"yushan_bank":16.4652,"ctbc_bank":1.004,"taishin_bank":1.9985,"oway_bank":3.1643,"primer":100.0,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":470.6028,"dora_cash":7.9699,"leo_stock":197.1914,"leo_cash":7.8883,"aaron_stock":197.1914,"aaron_cash":7.8883},"qyld_yield":0.058472,"monthly_kid_wan":3.0},{"date":"2024-06-01","balances":{"yushan_loan":-3085.0443,"mantou":-10.0,"td_us":3929.0907,"sinopac_us":1753.8113,"crypto":55.211,"sinopac_bank":23.8813,"yushan_bank":9.919,"ctbc_bank":1.0225,"taishin_bank":1.9985,"oway_bank":1.57,"primer":100.0,"yunxiang":150.0,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":493.5315,"dora_cash":6.8879,"leo_stock":207.1109,"leo_cash":7.609,"aaron_stock":207.1109,"aaron_cash":7.609},"qyld_yield":0.064739,"monthly_kid_wan":3.0},{"date":"2024-07-01","balances":{"yushan_loan":-3069.6566,"mantou":-10.0,"td_us":3984.9366,"sinopac_us":1795.4595,"crypto":52.6365,"sinopac_bank":15.3936,"yushan_bank":10.5876,"ctbc_bank":3.3716,"taishin_bank":1.9881,"oway_bank":1.0,"primer":100.0,"yunxiang":150.0,"mega_zar":14.1614,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":555.658,"dora_cash":6.6828,"leo_stock":233.8322,"leo_cash":7.1295,"aaron_stock":233.8322,"aaron_cash":7.1295,"jh_stock":42.1573,"jh_loan":131.565,"jh_cash":8.6511},"qyld_yield":0.062137,"monthly_kid_wan":3.0},{"date":"2024-08-01","balances":{"yushan_loan":-3054.2388,"mantou":-10.0,"td_us":4111.6265,"sinopac_us":1852.7583,"crypto":51.9088,"sinopac_bank":10.7407,"yushan_bank":12.8744,"ctbc_bank":2.5776,"taishin_bank":0.2102,"oway_bank":1.005,"primer":100.0,"yunxiang":150.0,"mega_zar":14.1614,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":548.9966,"dora_cash":5.6023,"leo_stock":231.6167,"leo_cash":6.4513,"aaron_stock":231.6167,"aaron_cash":6.4513,"jh_stock":172.6689,"jh_cash":7.4998},"qyld_yield":0.060174,"monthly_kid_wan":3.0},{"date":"2024-09-01","balances":{"yushan_loan":-3038.7917,"mantou":-10.0,"td_us":4172.0,"sinopac_us":1847.38,"crypto":43.3793,"sinopac_bank":9.7319,"yushan_bank":12.0307,"ctbc_bank":2.2836,"taishin_bank":0.2102,"oway_bank":3.3035,"primer":100.0,"yunxiang":150.0,"mega_zar":14.5559,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":544.1134,"dora_cash":15.8455,"leo_stock":230.6865,"leo_cash":10.2766,"aaron_stock":230.6865,"aaron_cash":10.2766,"jh_stock":172.421,"jh_cash":7.9546},"qyld_yield":0.064854,"monthly_kid_wan":3.0},{"date":"2024-10-01","balances":{"yushan_loan":-3023.3151,"mantou":-10.0,"td_us":4207.6092,"sinopac_us":1858.4578,"crypto":45.6746,"sinopac_bank":6.71,"yushan_bank":5.2869,"ctbc_bank":0.9988,"taishin_bank":0.2102,"oway_bank":1.3342,"primer":100.0,"yunxiang":150.0,"mega_zar":14.617,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":554.6605,"dora_cash":12.9735,"leo_stock":235.4364,"leo_cash":9.0162,"aaron_stock":235.4364,"aaron_cash":9.0162,"jh_stock":175.0374,"jh_cash":7.3612},"qyld_yield":0.066816,"monthly_kid_wan":3.0},{"date":"2024-11-01","balances":{"yushan_loan":-3007.8089,"mantou":-10.0,"td_us":4049.9424,"sinopac_us":1889.2964,"crypto":45.7189,"sinopac_bank":12.882,"yushan_bank":4.4704,"ctbc_bank":0.3118,"taishin_bank":0.2102,"oway_bank":0.4684,"primer":100.0,"yunxiang":150.0,"mega_zar":15.0953,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":578.2076,"dora_cash":10.2074,"leo_stock":247.0201,"leo_cash":7.1466,"aaron_stock":247.0201,"aaron_cash":7.1466,"jh_stock":181.3924,"jh_cash":6.4746},"qyld_yield":0.060417,"monthly_kid_wan":3.0},{"date":"2024-12-01","balances":{"yushan_loan":-2992.2731,"mantou":-10.0,"td_us":4317.4642,"sinopac_us":1973.5074,"crypto":62.1352,"sinopac_bank":5.9013,"yushan_bank":0.0788,"ctbc_bank":0.3118,"taishin_bank":0.0807,"oway_bank":1.0,"primer":100.0,"yunxiang":150.0,"mega_zar":14.9185,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":570.3751,"dora_cash":7.4361,"leo_stock":244.8769,"leo_cash":5.2718,"aaron_stock":244.8769,"aaron_cash":5.2718,"jh_stock":179.251,"jh_cash":5.5988},"qyld_yield":0.062565,"monthly_kid_wan":3.0},{"date":"2025-01-01","balances":{"yushan_loan":-2976.7075,"mantou":-12.4115,"td_us":4236.8771,"sinopac_us":1960.9307,"crypto":60.5535,"sinopac_bank":5.6498,"yushan_bank":0.9291,"ctbc_bank":5.5003,"taishin_bank":0.0819,"oway_bank":0.541,"primer":100.0,"yunxiang":186.1726,"mega_zar":14.8199,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":595.8481,"dora_cash":5.6186,"leo_stock":256.5255,"leo_cash":4.0353,"aaron_stock":256.5255,"aaron_cash":4.0353,"jh_stock":186.2498,"jh_cash":5.0098},"qyld_yield":0.058844,"monthly_kid_wan":3.0},{"date":"2025-02-01","balances":{"yushan_loan":-2970.7297,"mantou":-13.042,"td_us":4360.296,"sinopac_us":2010.3545,"crypto":60.6508,"sinopac_bank":5.0,"yushan_bank":21.4731,"ctbc_bank":0.3003,"taishin_bank":0.0819,"oway_bank":0.819,"primer":100.0,"yunxiang":195.6305,"mega_zar":14.4677,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":613.0776,"dora_cash":6.0535,"leo_stock":264.9321,"leo_cash":3.0879,"aaron_stock":264.9321,"aaron_cash":3.0879,"jh_stock":190.7294,"jh_cash":5.0129},"qyld_yield":0.07209,"monthly_kid_wan":3.0},{"date":"2025-03-01","balances":{"yushan_loan":-2955.1242,"mantou":-13.9712,"td_us":4341.2507,"sinopac_us":2001.3871,"crypto":47.0983,"sinopac_bank":9.5014,"yushan_bank":19.5525,"ctbc_bank":6.1803,"taishin_bank":0.0819,"oway_bank":1.95,"primer":100.0,"yunxiang":209.5686,"mega_zar":14.7805,"labor_self":10.8,"labor_perf":3.3744,"house":2600.0,"land":200.0,"dora_stock":595.7235,"dora_cash":11.6192,"leo_stock":259.4999,"leo_cash":5.8853,"aaron_stock":259.4999,"aaron_cash":5.8853,"jh_stock":186.7751,"jh_cash":8.681},"qyld_yield":0.084952,"monthly_kid_wan":3.0},{"date":"2025-04-01","balances":{"yushan_loan":-2929.8315,"mantou":-12.4792,"td_us":4188.1717,"sinopac_us":1923.904,"crypto":44.9534,"sinopac_bank":4.5,"yushan_bank":0.47,"ctbc_bank":1.0,"taishin_bank":0.0819,"oway_bank":0.18,"primer":100.0,"yunxiang":187.1881,"mega_zar":14.8425,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":551.9284,"dora_cash":9.7425,"leo_stock":240.8646,"leo_cash":4.6005,"aaron_stock":240.8646,"aaron_cash":4.6005,"jh_stock":174.1957,"jh_cash":8.0452},"qyld_yield":0.082191,"monthly_kid_wan":3.0},{"date":"2025-05-01","balances":{"yushan_loan":-3396.1463,"mantou":-11.2666,"td_us":4087.9606,"sinopac_us":1963.2524,"crypto":43.6268,"tw_stock":45.2296,"sinopac_bank":230.1273,"yushan_bank":85.8552,"ctbc_bank":5.3803,"taishin_bank":0.0819,"oway_bank":1.3203,"primer":100.0,"yunxiang":168.999,"mega_zar":15.1615,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":531.2712,"dora_cash":10.599,"leo_stock":232.369,"leo_cash":6.8183,"aaron_stock":232.369,"aaron_cash":6.8183,"jh_stock":174.1957,"jh_cash":8.0452},"qyld_yield":0.074971,"monthly_kid_wan":3.0},{"date":"2025-06-01","balances":{"yushan_loan":-3375.1557,"mantou":-10.7522,"td_us":4141.7519,"sinopac_us":1981.8259,"crypto":48.2603,"tw_stock":61.3338,"sinopac_bank":71.0124,"yushan_bank":81.7328,"ctbc_bank":2.4087,"taishin_bank":0.0819,"oway_bank":6.5946,"primer":100.0,"yunxiang":161.2832,"mega_zar":14.5353,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":562.0761,"dora_cash":8.3456,"leo_stock":246.8033,"leo_cash":5.4503,"aaron_stock":246.8033,"aaron_cash":5.4503,"jh_stock":175.1656,"jh_cash":6.3015},"qyld_yield":0.086321,"monthly_kid_wan":3.0},{"date":"2025-07-01","balances":{"yushan_loan":-3354.1245,"mantou":-10.4436,"td_us":4253.4976,"sinopac_us":1997.4237,"crypto":47.2542,"tw_stock":228.3669,"sinopac_bank":45.1592,"yushan_bank":81.0634,"ctbc_bank":1.1173,"taishin_bank":0.0819,"oway_bank":12.25,"primer":100.0,"mega_zar":14.1541,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":604.1151,"dora_cash":6.4708,"leo_stock":264.9033,"leo_cash":4.6587,"aaron_stock":264.9033,"aaron_cash":4.6587,"jh_stock":187.4071,"jh_cash":5.6778,"yunxiang":156.6538},"qyld_yield":0.079769,"monthly_kid_wan":3.0},{"date":"2025-08-01","balances":{"yushan_loan":-3333.0525,"mantou":-10.2378,"td_us":4447.094,"sinopac_us":2063.9668,"crypto":61.7523,"tw_stock":220.0727,"sinopac_bank":19.2175,"yushan_bank":48.4042,"ctbc_bank":0.9608,"taishin_bank":0.0819,"oway_bank":1.116,"primer":100.0,"mega_zar":13.8627,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":645.6843,"dora_cash":4.2133,"leo_stock":283.982,"leo_cash":3.3257,"aaron_stock":283.982,"aaron_cash":3.3257,"jh_stock":198.3465,"jh_cash":104.8239,"yunxiang":153.5675},"qyld_yield":0.076391,"monthly_kid_wan":3.0},{"date":"2025-09-01","balances":{"yushan_loan":-3311.9398,"mantou":-11.0343,"td_us":4599.7528,"sinopac_us":2126.3564,"crypto":72.6841,"tw_stock":232.9086,"sinopac_bank":13.3547,"yushan_bank":41.2869,"ctbc_bank":0.3249,"taishin_bank":0.0819,"oway_bank":1.1666,"primer":100.0,"mega_zar":14.1829,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":659.776,"dora_cash":6.0536,"leo_stock":290.8395,"leo_cash":3.6798,"aaron_stock":290.8395,"aaron_cash":3.6798,"jh_stock":231.2439,"jh_cash":77.3588,"yunxiang":165.5144},"qyld_yield":0.073971,"monthly_kid_wan":3.0},{"date":"2025-10-01","balances":{"yushan_loan":-3290.7862,"mantou":-11.7146,"td_us":4775.3375,"sinopac_us":2178.9003,"crypto":75.7117,"tw_stock":243.8922,"sinopac_bank":23.2065,"yushan_bank":18.1573,"ctbc_bank":0.8361,"taishin_bank":0.0819,"oway_bank":1.16,"primer":100.0,"mega_zar":14.7614,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":725.7162,"dora_cash":4.0413,"leo_stock":320.1159,"leo_cash":2.3412,"aaron_stock":320.1159,"aaron_cash":2.3412,"jh_stock":244.6883,"jh_cash":98.5552,"yunxiang":175.719},"qyld_yield":0.07953,"monthly_kid_wan":3.0},{"date":"2025-11-01","balances":{"yushan_loan":-3269.5916,"mantou":-10.7356,"td_us":4879.8697,"sinopac_us":2191.2673,"crypto":75.1544,"tw_stock":179.5219,"sinopac_bank":52.3867,"yushan_bank":12.7269,"ctbc_bank":3.3333,"taishin_bank":0.0819,"oway_bank":4.6133,"primer":100.0,"mega_zar":15.1664,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":799.4699,"dora_cash":8.5036,"leo_stock":346.6565,"leo_cash":7.7361,"aaron_stock":346.6565,"aaron_cash":7.7361,"jh_stock":310.1359,"jh_cash":45.146,"yunxiang":161.0344},"qyld_yield":0.088709,"monthly_kid_wan":5.0,"tesla_pmt_wan":2.4},{"date":"2025-12-01","balances":{"yushan_loan":-3248.3561,"mantou":-12.5111,"td_us":4926.2654,"sinopac_us":2229.6727,"crypto":60.5087,"tw_stock":191.059,"sinopac_bank":1.578,"yushan_bank":18.3498,"ctbc_bank":0.278,"taishin_bank":0.0819,"oway_bank":4.15,"primer":100.0,"mega_zar":15.3988,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":764.7397,"dora_cash":7.2654,"leo_stock":332.4167,"leo_cash":6.3618,"aaron_stock":332.4167,"aaron_cash":6.3618,"jh_stock":302.79,"jh_cash":38.598,"yunxiang":187.6659},"qyld_yield":0.068625,"monthly_kid_wan":5.0},{"date":"2026-01-01","balances":{"yushan_loan":-3227.0794,"taishin_car_loan":-180.0,"mantou":-12.0299,"td_us":4827.7708,"sinopac_us":2210.1713,"crypto":61.77,"tw_stock":185.725,"sinopac_bank":33.7784,"yushan_bank":6.0,"ctbc_bank":1.4338,"taishin_bank":0.0819,"oway_bank":3.8,"primer":100.0,"mega_zar":15.8101,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":827.2766,"dora_cash":5.675,"leo_stock":358.9458,"leo_cash":5.2511,"aaron_stock":358.9458,"aaron_cash":5.2511,"jh_stock":327.0096,"jh_cash":32.8759,"yunxiang":180.4481},"qyld_yield":0.060059,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1},{"date":"2026-02-01","balances":{"yushan_loan":-3205.7614,"taishin_car_loan":-177.85,"mantou":-11.6316,"td_us":4830.9712,"sinopac_us":2164.475,"crypto":52.7872,"tw_stock":181.7177,"sinopac_bank":25.925,"yushan_bank":15.0,"ctbc_bank":1.4338,"taishin_bank":0.0819,"oway_bank":2.0,"primer":100.0,"mega_zar":16.4852,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":889.8991,"dora_cash":4.8118,"leo_stock":383.8352,"leo_cash":3.9068,"aaron_stock":383.8352,"aaron_cash":3.9068,"jh_stock":346.6092,"jh_cash":26.5175,"yunxiang":174.4746},"qyld_yield":0.060059,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1},{"date":"2026-03-01","balances":{"yushan_loan":-3184.4023,"taishin_car_loan":-175.7142,"mantou":-11.469,"td_us":4734.2083,"sinopac_us":2105.7145,"crypto":42.326,"tw_stock":181.7182,"sinopac_bank":5.7569,"yushan_bank":17.6202,"ctbc_bank":0.6953,"taishin_bank":0.0819,"oway_bank":2.003,"primer":100.0,"mega_zar":17.3373,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":987.8605,"dora_cash":18.8328,"leo_stock":424.6723,"leo_cash":12.1002,"aaron_stock":424.6723,"aaron_cash":12.1002,"jh_stock":402.7335,"jh_cash":11.0062,"yunxiang":172.0354},"qyld_yield":0.060059,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1429},{"date":"2026-05-01","balances":{"yushan_loan":-3141.5597,"taishin_car_loan":-171.4284,"mantou":-10.354,"td_us":4996.7418,"sinopac_us":2016.2751,"crypto":47.3884,"tw_stock":160.8648,"sinopac_bank":24.1079,"yushan_bank":2.5361,"ctbc_bank":1.1493,"taishin_bank":0.0819,"primer":100.0,"mega_zar":16.4869,"labor_self":10.8,"labor_perf":5.6498,"house":2600.0,"land":200.0,"dora_stock":1089.7997,"dora_cash":89.1382,"leo_stock":433.8602,"leo_cash":69.34,"aaron_stock":433.8602,"aaron_cash":69.34,"jh_stock":401.0879,"jh_cash":52.9534,"yunxiang":155.3097},"qyld_yield":0.071216,"monthly_kid_wan":4.5,"tesla_pmt_wan":2.1429}],"accounts":[{"id":"td_us","name":"TD 美股","category":"stock","side":"asset","liquid":true,"owner":"me","active":true},{"id":"sinopac_us","name":"永豐美股","category":"stock","side":"asset","liquid":true,"owner":"me","active":true},{"id":"crypto","name":"虛擬幣","category":"crypto","side":"asset","liquid":true,"owner":"me","active":true},{"id":"tw_stock","name":"台股","category":"stock","side":"asset","liquid":true,"owner":"me","active":true},{"id":"sinopac_bank","name":"永豐銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"yushan_bank","name":"玉山銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"ctbc_bank","name":"中信銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"taishin_bank","name":"台新銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"oway_bank","name":"王道銀","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"primer","name":"普瑞默","category":"other","side":"asset","liquid":false,"owner":"me","active":true},{"id":"mega_zar","name":"兆豐南非幣","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"labor_self","name":"勞退自提","category":"pension","side":"asset","liquid":false,"owner":"me","active":true},{"id":"labor_perf","name":"勞退績效","category":"pension","side":"asset","liquid":false,"owner":"me","active":true},{"id":"house","name":"房子","category":"real_estate","side":"asset","liquid":false,"owner":"me","active":true},{"id":"land","name":"土地","category":"real_estate","side":"asset","liquid":false,"owner":"me","active":true},{"id":"yunxiang","name":"雲象","category":"other","side":"asset","liquid":false,"owner":"me","active":true},{"id":"cash_legacy","name":"現金(舊)","category":"cash","side":"asset","liquid":true,"owner":"me","active":true},{"id":"yushan_loan","name":"玉山貸款","category":"loan","side":"liability","liquid":true,"owner":"me","active":true,"auto":{"type":"amortize","principal_wan":3141.5597,"rate":0.021,"years_left":28,"last_balance_wan":-3141.5597}},{"id":"mantou","name":"欠饅頭","category":"loan","side":"liability","liquid":true,"owner":"me","active":true},{"id":"fubon_loan","name":"富邦房貸","category":"loan","side":"liability","liquid":true,"owner":"me","active":true},{"id":"taishin_car_loan","name":"台新車貸","category":"loan","side":"liability","liquid":true,"owner":"me","active":true},{"id":"xt_loan","name":"小彤借款","category":"loan","side":"liability","liquid":true,"owner":"me","active":true},{"id":"dora_stock","name":"Dora 股票","category":"stock","side":"asset","liquid":true,"owner":"dora","active":true},{"id":"dora_cash","name":"Dora 現金","category":"cash","side":"asset","liquid":true,"owner":"dora","active":true},{"id":"leo_stock","name":"Leo 股票","category":"stock","side":"asset","liquid":true,"owner":"leo","active":true},{"id":"leo_cash","name":"Leo 現金","category":"cash","side":"asset","liquid":true,"owner":"leo","active":true},{"id":"aaron_stock","name":"Aaron 股票","category":"stock","side":"asset","liquid":true,"owner":"aaron","active":true},{"id":"aaron_cash","name":"Aaron 現金","category":"cash","side":"asset","liquid":true,"owner":"aaron","active":true},{"id":"jh_stock","name":"景翰 股票","category":"stock","side":"asset","liquid":true,"owner":"jinghan","active":true},{"id":"jh_loan","name":"景翰 借券","category":"other","side":"asset","liquid":true,"owner":"jinghan","active":true},{"id":"jh_cash","name":"景翰 現金","category":"cash","side":"asset","liquid":true,"owner":"jinghan","active":true}]};
 
 
 let DATA = loadData();
@@ -1200,9 +1222,38 @@ let DATA = loadData();
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const stored = JSON.parse(raw);
+      // V0.7.1 升級補齊:用 DEFAULT_DATA 補上 stored 缺少的欄位
+      // 規則:settings 子欄位若不存在或為空,用 DEFAULT_DATA 補。其他不動。
+      stored.settings = mergeSettings(DEFAULT_DATA.settings, stored.settings || {});
+      // accounts 欄位也補齊(以防舊資料缺)
+      if (!stored.accounts || stored.accounts.length === 0) {
+        stored.accounts = DEFAULT_DATA.accounts;
+      }
+      if (!stored.snapshots) stored.snapshots = [];
+      if (!stored.version) stored.version = DEFAULT_DATA.version;
+      return stored;
+    }
   } catch (e) { console.warn('load fail', e); }
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+// 合併 settings:預設值 + 已存值,已存有什麼用什麼,沒有的補預設
+// loan_pmt_wan 特例:如果存的是空陣列或不存在,補預設(因為這是 V0.6 新欄位)
+function mergeSettings(defaults, stored) {
+  const out = { ...defaults };
+  for (const key of Object.keys(stored)) {
+    if (stored[key] !== undefined && stored[key] !== null) {
+      // 陣列類型:如果已存非空就保留,否則用預設
+      if (Array.isArray(stored[key]) && stored[key].length === 0) {
+        out[key] = defaults[key] || [];
+      } else {
+        out[key] = stored[key];
+      }
+    }
+  }
+  return out;
 }
 
 function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
@@ -2591,11 +2642,23 @@ function renderSettings() {
       固定每月繳款金額(萬/月)。用於計算月支出 + 退休試算的累積還款。<br>
       <span style="color:var(--ink-dim);">特斯拉車貸金額逐月變動,在每月「資產表」輸入。</span>
     </p>
+    ${(s.loan_pmt_wan || []).length === 0 ? `
+      <p style="color:var(--ink-dim);font-size:13px;text-align:center;padding:20px 0;">
+        尚無貸款項目<br><span style="font-size:11px;">點下方「+ 新增貸款」加入</span>
+      </p>
+    ` : ''}
     ${(s.loan_pmt_wan || []).map((loan, idx) => `
       <div class="loan-pmt-card">
         <div class="top">
-          <span class="nm">${loan.name}</span>
-          <span class="due">每月 ${loan.due_day} 號</span>
+          <input type="text" class="loan-name-input" value="${loan.name}"
+                 oninput="updateLoanField(${idx}, 'name', this.value)"
+                 onfocus="this.select()" />
+          <span class="due-edit">
+            每月 <input type="number" inputmode="numeric" min="1" max="31" value="${loan.due_day}"
+                       oninput="updateLoanField(${idx}, 'due_day', this.value)"
+                       onfocus="this.select()" /> 號
+          </span>
+          <button class="loan-del-btn" onclick="removeLoan(${idx})" aria-label="刪除">✕</button>
         </div>
         <div class="bottom">
           <input type="number" inputmode="decimal" step="0.0001"
@@ -2606,6 +2669,7 @@ function renderSettings() {
         </div>
       </div>
     `).join('')}
+    <button class="btn-add-loan" onclick="addLoan()">+ 新增貸款</button>
     <p id="loan-pmt-sum" style="color:var(--gold-soft);font-size:12px;margin-top:10px;text-align:right;font-family:var(--num);">
       合計:${fmtWan((s.loan_pmt_wan || []).reduce((sum, l) => sum + (l.wan_per_month || 0), 0), {dp:4})} 萬/月
     </p>
@@ -2717,6 +2781,41 @@ function updateLoanPmt(idx, val) {
       sumEl.textContent = `合計:${fmtWan(sum, {dp:4})} 萬/月`;
     }
   }
+}
+
+// V0.7.1 加:支援編輯貸款名稱、繳款日
+function updateLoanField(idx, field, val) {
+  if (!DATA.settings.loan_pmt_wan?.[idx]) return;
+  if (field === 'name') {
+    DATA.settings.loan_pmt_wan[idx].name = val;
+  } else if (field === 'due_day') {
+    const d = parseInt(val);
+    if (d >= 1 && d <= 31) DATA.settings.loan_pmt_wan[idx].due_day = d;
+  }
+  saveData();
+  // 不重繪(避免輸入框失焦)
+}
+
+function addLoan() {
+  if (!DATA.settings.loan_pmt_wan) DATA.settings.loan_pmt_wan = [];
+  DATA.settings.loan_pmt_wan.push({
+    name: '新貸款',
+    wan_per_month: 0,
+    due_day: 1,
+  });
+  saveData();
+  renderSettings();
+  toast('已新增,請填寫');
+}
+
+function removeLoan(idx) {
+  if (!DATA.settings.loan_pmt_wan?.[idx]) return;
+  const loan = DATA.settings.loan_pmt_wan[idx];
+  if (!confirm(`刪除「${loan.name}」(${fmtWan(loan.wan_per_month, {dp:4})} 萬/月)?`)) return;
+  DATA.settings.loan_pmt_wan.splice(idx, 1);
+  saveData();
+  renderSettings();
+  toast('已刪除');
 }
 
 function toggleShowInactive() {

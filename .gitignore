@@ -1,13 +1,62 @@
+# === Kit 標準模板(SELA-Starter-Kit V1.8.0)===
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 venv/
+ENV/
+env/
 .venv/
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.local
+
+# Logs
+*.log
+logs/
+
+# OS
 .DS_Store
 Thumbs.db
-.env
-*.log
-*.bak
+
+# Node (if applicable)
+node_modules/
+
+# Flet
+.flet/
+
+# === Ledger 專案特定 ===
+# Sela 個人 Excel 原始資料(資產真實數字,絕不上 Git)
 總資產*.xlsx
 *.xlsx
+
+# 暫存備份
+*.bak
